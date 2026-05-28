@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "Respeta AGENTS.md",
+    "Usa las skills del proyecto cuando sean relevantes",
+    "Mantén arquitectura hexagonal y mongoose",
+    "Antes de ejecutar una skill, revisa su sección de cuándo usarla y cuándo no usarla"
+  ],
+  "skills": {
+    "paths": [
+      ".opencode/skills"
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+.husky/pre-commit-docs-reminder
+npm run format
