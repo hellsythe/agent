@@ -1,0 +1,7 @@
+import { RequestContextPort } from '../../application/ports/request-context.port';
+export declare class RequestContextAdapter implements RequestContextPort {
+    private readonly storage;
+    runWithRequestId(requestId: string, callback: () => void): void;
+    getRequestId(): string | undefined;
+    get<T = any>(key: string): T | undefined;
+}

@@ -1,0 +1,6 @@
+export interface StartedContainerLike {
+    getHost(): string;
+    getMappedPort(port: number): number;
+    stop(options?: unknown): Promise<unknown>;
+    exec?(command: string[]): Promise<unknown>;
+}

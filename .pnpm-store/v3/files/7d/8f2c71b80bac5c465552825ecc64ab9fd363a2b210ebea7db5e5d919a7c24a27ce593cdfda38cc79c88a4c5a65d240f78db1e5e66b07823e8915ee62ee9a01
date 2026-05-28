@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mapDomainError = mapDomainError;
+function mapDomainError(error) {
+    return {
+        type: error.type,
+        title: error.name,
+        status: 400,
+        detail: error.message,
+    };
+}
+//# sourceMappingURL=problem-details.mapper.js.map

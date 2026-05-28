@@ -1,0 +1,1 @@
+{"version":3,"file":"disabled-feature-flag.adapter.js","sourceRoot":"","sources":["../../../../src/shared/infrastructure/feature-flags/disabled-feature-flag.adapter.ts"],"names":[],"mappings":";;;AAAA,iFAA4E;AAE5E,MAAa,0BAA2B,SAAQ,mCAAe;IAC7D,KAAK,CAAC,SAAS,CAAC,CAAS,EAAE,EAAW;QACpC,OAAO,KAAK,CAAC;IACf,CAAC;CACF;AAJD,gEAIC"}

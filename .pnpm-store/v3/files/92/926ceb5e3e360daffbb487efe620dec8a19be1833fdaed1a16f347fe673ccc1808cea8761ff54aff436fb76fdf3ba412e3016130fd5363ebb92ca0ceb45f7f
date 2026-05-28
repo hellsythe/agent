@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mapApplicationError = mapApplicationError;
+function mapApplicationError(error) {
+    return {
+        type: error.type,
+        title: error.title,
+        status: error.status,
+        detail: error.message,
+    };
+}
+//# sourceMappingURL=application-error.mapper.js.map

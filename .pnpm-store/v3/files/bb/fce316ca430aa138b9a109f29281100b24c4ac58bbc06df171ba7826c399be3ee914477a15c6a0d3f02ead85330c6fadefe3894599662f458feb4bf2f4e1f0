@@ -1,0 +1,17 @@
+import type { ServiceConnectionInfo, TestServiceContainer } from '../contracts/test-service-container';
+export declare abstract class AbstractTestServiceContainer implements TestServiceContainer {
+    readonly name: string;
+    private started;
+    private info?;
+    constructor(name: string);
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    reset(): Promise<void>;
+    getConnectionInfo(): ServiceConnectionInfo;
+    getEnv(): Record<string, string>;
+    protected assertStarted(): void;
+    protected abstract doStart(): Promise<ServiceConnectionInfo>;
+    protected abstract doStop(): Promise<void>;
+    protected doReset?(): Promise<void>;
+    protected abstract buildEnv(connectionInfo: ServiceConnectionInfo): Record<string, string>;
+}

@@ -1,0 +1,13 @@
+import { PaginationOptions } from './pagination.options';
+export interface NormalizedPagination {
+    page: number;
+    perPage: number;
+    offset: number;
+    limit: number;
+}
+export declare class PaginationNormalizer {
+    private static readonly DEFAULT_PAGE;
+    private static readonly DEFAULT_PER_PAGE;
+    private static readonly MAX_PER_PAGE;
+    static normalize(options?: PaginationOptions): NormalizedPagination;
+}

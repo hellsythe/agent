@@ -1,0 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.setupSwagger = setupSwagger;
+const swagger_1 = require("@nestjs/swagger");
+const config_1 = require("@nestjs/config");
+function setupSwagger(app) {
+    const configService = app.get(config_1.ConfigService);
+    const builder = new swagger_1.DocumentBuilder()
+        .setTitle('Templates admin')
+        .setDescription('Administrador de plantillas meta')
+        .setVersion('1.0')
+        .addBearerAuth();
+    const baseUrl = configService.get('BASE_URL')?.trim();
+    if (baseUrl) {
+        builder.addServer(baseUrl);
+    }
+    const config = builder.build();
+    const document = swagger_1.SwaggerModule.createDocument(app, config);
+    swagger_1.SwaggerModule.setup('api', app, document);
+}
+//# sourceMappingURL=swagger.config.js.map

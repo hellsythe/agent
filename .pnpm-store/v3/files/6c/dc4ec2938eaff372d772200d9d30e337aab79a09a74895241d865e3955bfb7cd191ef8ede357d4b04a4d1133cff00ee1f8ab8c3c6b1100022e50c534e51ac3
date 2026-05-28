@@ -1,0 +1,26 @@
+import { Name, UnleashTypes } from './client';
+import { Context } from './context';
+import { UnleashEvents } from './events';
+import type { ClientFeaturesResponse } from './feature';
+import InMemStorageProvider from './repository/storage-provider-in-mem';
+import { TagFilter } from './tags';
+import { Unleash } from './unleash';
+import type { UnleashConfig } from './unleash-config';
+import { PayloadType, Variant } from './variant';
+export { UnleashMetricClient } from './impact-metrics/metric-client';
+export { Strategy } from './strategy/index';
+export type { ClientFeaturesResponse, UnleashConfig };
+export { Context, InMemStorageProvider, Name, PayloadType, TagFilter, Unleash, UnleashEvents, UnleashTypes, Variant, };
+export declare function initialize(options: UnleashConfig): Unleash;
+export declare function startUnleash(options: UnleashConfig): Promise<Unleash>;
+export declare function isEnabled(name: Name, context?: Context, fallbackValue?: boolean): boolean;
+export declare function destroy(): void;
+export declare function getFeatureToggleDefinition(toggleName: string): import("./feature").FeatureInterface | undefined;
+export declare function getFeatureToggleDefinitions(withFullSegments?: boolean): import("./feature").EnhancedFeatureInterface[] | undefined;
+export declare function getVariant(name: string, context?: Context, fallbackVariant?: Variant): Variant;
+export declare function forceGetVariant(name: string, context?: Context, fallbackVariant?: Variant): Variant;
+export declare function count(toggleName: string, enabled: boolean): void | undefined;
+export declare function countVariant(toggleName: string, variantName: string): void | undefined;
+export declare function flushMetrics(): Promise<void>;
+export declare function destroyWithFlush(): Promise<void>;
+//# sourceMappingURL=index.d.ts.map

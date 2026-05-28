@@ -1,0 +1,116 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MongoCriteriaBuilder = void 0;
+/**
+ * Builder que traduce criteria genéricos a filtros de MongoDB
+ */
+class MongoCriteriaBuilder {
+    /**
+     * Construye un filtro de Mongo a partir de un criteria genérico
+     * @param criteria - Objeto con los valores a filtrar
+     * @param filterMap - Mapa que define qué operador usar para cada campo
+     */
+    static build(criteria, filterMap) {
+        const filters = [];
+        for (const [key, value] of Object.entries(criteria)) {
+            // Si el valor es undefined o null, skip
+            if (value === undefined || value === null) {
+                continue;
+            }
+            // Obtener configuración del filtro para este campo
+            const config = filterMap[key];
+            if (!config) {
+                // Si no hay configuración, usar igualdad por defecto
+                filters.push({ [key]: value });
+                continue;
+            }
+            // Usar alias si está configurado, sino usar el nombre del campo del criteria
+            const fieldName = config.fieldName || key;
+            // Aplicar el operador configurado
+            const filter = this.applyOperator(fieldName, value, config);
+            if (filter && Object.keys(filter).length > 0) {
+                filters.push(filter);
+            }
+        }
+        // Si no hay filtros, retornar filtro vacío
+        if (filters.length === 0) {
+            return {};
+        }
+        // Si hay un solo filtro, retornarlo directamente
+        if (filters.length === 1) {
+            return filters[0];
+        }
+        // Si hay múltiples filtros, usar $and
+        return { $and: filters };
+    }
+    static applyOperator(field, value, config) {
+        switch (config.operator) {
+            case 'like':
+                return this.buildLikeFilter(field, value, config.options);
+            case 'in':
+                return Array.isArray(value) && value.length > 0
+                    ? { [field]: { $in: value } }
+                    : {};
+            case 'neq':
+                return { [field]: { $ne: value } };
+            case 'gt':
+                return { [field]: { $gt: value } };
+            case 'gte':
+                return { [field]: { $gte: value } };
+            case 'lt':
+                return { [field]: { $lt: value } };
+            case 'lte':
+                return { [field]: { $lte: value } };
+            case 'range':
+                return this.buildRangeFilter(field, value);
+            case 'equals':
+            default:
+                return { [field]: value };
+        }
+    }
+    static buildLikeFilter(field, value, options) {
+        if (typeof value !== 'string' || value.trim() === '') {
+            return {};
+        }
+        const matchType = options?.matchType || 'contains';
+        const caseSensitive = options?.caseSensitive || false;
+        let pattern;
+        switch (matchType) {
+            case 'startsWith':
+                pattern = `^${this.escapeRegex(value)}`;
+                break;
+            case 'endsWith':
+                pattern = `${this.escapeRegex(value)}$`;
+                break;
+            case 'contains':
+            default:
+                pattern = this.escapeRegex(value);
+                break;
+        }
+        const regex = new RegExp(pattern, caseSensitive ? '' : 'i');
+        return { [field]: regex };
+    }
+    static buildRangeFilter(field, value) {
+        if (!value || typeof value !== 'object') {
+            return {};
+        }
+        const hasFrom = value.from !== undefined && value.from !== null;
+        const hasTo = value.to !== undefined && value.to !== null;
+        if (!hasFrom && !hasTo) {
+            return {};
+        }
+        const range = {};
+        if (hasFrom) {
+            range.$gte = value.from;
+        }
+        if (hasTo) {
+            range.$lte = value.to;
+        }
+        return { [field]: range };
+    }
+    static escapeRegex(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+}
+exports.MongoCriteriaBuilder = MongoCriteriaBuilder;
+//# sourceMappingURL=mongo-criteria.builder.js.map

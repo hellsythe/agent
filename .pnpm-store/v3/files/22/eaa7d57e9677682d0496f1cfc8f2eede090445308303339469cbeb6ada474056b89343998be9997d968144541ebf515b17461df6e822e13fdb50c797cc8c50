@@ -1,0 +1,11 @@
+import { ContainerOrchestrator } from '../container-orchestrator';
+export type TestInfrastructureProfile = 'mongo' | 'full';
+export interface TestInfrastructureRuntime {
+    orchestrator: ContainerOrchestrator;
+    env: Record<string, string>;
+    stop: () => Promise<void>;
+}
+export interface TestInfrastructureOptions {
+    profile?: TestInfrastructureProfile;
+}
+export declare function startDefaultTestInfrastructure(options?: TestInfrastructureOptions): Promise<TestInfrastructureRuntime>;

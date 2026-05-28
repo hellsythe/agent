@@ -1,0 +1,13 @@
+export interface ServiceConnectionInfo {
+    host: string;
+    port: number;
+    url?: string;
+}
+export interface TestServiceContainer {
+    readonly name: string;
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    reset?(): Promise<void>;
+    getConnectionInfo(): ServiceConnectionInfo;
+    getEnv(): Record<string, string>;
+}

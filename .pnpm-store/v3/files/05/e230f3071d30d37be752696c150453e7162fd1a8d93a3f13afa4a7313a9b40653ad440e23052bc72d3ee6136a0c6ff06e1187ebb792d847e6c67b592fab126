@@ -1,0 +1,78 @@
+import type { Context } from '../context';
+export interface NumericMetricSample {
+    labels: MetricLabels;
+    value: number;
+}
+export interface BucketMetricSample {
+    labels: MetricLabels;
+    count: number;
+    sum: number;
+    buckets: Array<{
+        le: number | '+Inf';
+        count: number;
+    }>;
+}
+export type MetricSample = NumericMetricSample | BucketMetricSample;
+export type CollectedMetric = {
+    name: string;
+    help: string;
+    type: 'counter' | 'gauge';
+    samples: NumericMetricSample[];
+} | {
+    name: string;
+    help: string;
+    type: 'histogram';
+    samples: BucketMetricSample[];
+};
+export type MetricLabels = Record<string, string>;
+export interface Counter {
+    inc(value?: number, labels?: MetricLabels): void;
+}
+export interface Gauge {
+    inc(value?: number, labels?: MetricLabels): void;
+    dec(value?: number, labels?: MetricLabels): void;
+    set(value: number, labels?: MetricLabels): void;
+}
+export interface Histogram {
+    observe(value: number, labels?: MetricLabels): void;
+    restore(sample: BucketMetricSample): void;
+}
+export interface ImpactMetricsDataSource {
+    collect(): CollectedMetric[];
+    restore(metrics: CollectedMetric[]): void;
+}
+export interface ImpactMetricRegistry {
+    getCounter(counterName: string): Counter | undefined;
+    getGauge(gaugeName: string): Gauge | undefined;
+    getHistogram(histogramName: string): Histogram | undefined;
+    counter(opts: MetricOptions): Counter;
+    gauge(opts: MetricOptions): Gauge;
+    histogram(opts: BucketMetricOptions): Histogram;
+}
+export declare class InMemoryMetricRegistry implements ImpactMetricsDataSource, ImpactMetricRegistry {
+    private counters;
+    private gauges;
+    private histograms;
+    getCounter(counterName: string): Counter | undefined;
+    getGauge(gaugeName: string): Gauge | undefined;
+    getHistogram(histogramName: string): Histogram | undefined;
+    counter(opts: MetricOptions): Counter;
+    gauge(opts: MetricOptions): Gauge;
+    histogram(opts: BucketMetricOptions): Histogram;
+    collect(): CollectedMetric[];
+    restore(metrics: CollectedMetric[]): void;
+}
+export interface MetricOptions {
+    name: string;
+    help: string;
+    labelNames?: string[];
+}
+export interface BucketMetricOptions extends MetricOptions {
+    buckets?: number[];
+}
+/** @deprecated MetricFlagContext will be removed in a future release. */
+export interface MetricFlagContext {
+    flagNames: string[];
+    context: Context;
+}
+//# sourceMappingURL=metric-types.d.ts.map

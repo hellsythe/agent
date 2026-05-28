@@ -1,0 +1,12 @@
+import { LoggerPort } from '../../application/ports/logger.port';
+import { RequestContextPort } from '../../application/ports/request-context.port';
+import { Logger } from 'nestjs-pino';
+export declare class PinoLoggerAdapter implements LoggerPort {
+    private readonly logger;
+    private readonly context;
+    constructor(logger: Logger, context: RequestContextPort);
+    private enrich;
+    info(message: string, meta?: Record<string, any>): void;
+    warn(message: string, meta?: Record<string, any>): void;
+    error(message: string, meta?: Record<string, any>): void;
+}

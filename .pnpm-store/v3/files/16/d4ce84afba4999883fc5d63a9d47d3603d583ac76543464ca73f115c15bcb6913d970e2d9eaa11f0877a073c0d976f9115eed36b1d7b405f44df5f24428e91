@@ -1,0 +1,108 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MongoRepositoryBase = void 0;
+const pagination_normalizer_1 = require("../../../application/pagination/pagination.normalizer");
+const pagination_result_factory_1 = require("../../../application/pagination/pagination-result.factory");
+/**
+ * Base repository de Mongo
+ * - SOLO infraestructura
+ * - NO expone contratos de dominio
+ * - Reutiliza CRUD técnico
+ */
+class MongoRepositoryBase {
+    model;
+    constructor(model) {
+        this.model = model;
+    }
+    toMongoWriteResult(result) {
+        return {
+            acknowledged: result.acknowledged,
+            matchedCount: result.matchedCount,
+            modifiedCount: result.modifiedCount,
+        };
+    }
+    buildSetPayload(document, options) {
+        const payload = {
+            ...document,
+        };
+        if (options?.touchUpdatedAt !== false) {
+            payload.updatedAt = new Date();
+        }
+        if (options && 'updatedBy' in options) {
+            payload.updatedBy = options.updatedBy;
+        }
+        return payload;
+    }
+    /* =====================================================
+     * READ
+     * ===================================================== */
+    async findOneRaw(filter) {
+        return this.model
+            .findOne({ ...filter, deletedAt: null })
+            .lean()
+            .exec();
+    }
+    async findManyRaw(filter) {
+        return this.model
+            .find({ ...filter, deletedAt: null })
+            .lean()
+            .exec();
+    }
+    async findPaginatedRaw(filter, pagination, sort) {
+        const total = await this.model.countDocuments({
+            ...filter,
+            deletedAt: null,
+        });
+        const query = this.model
+            .find({ ...filter, deletedAt: null })
+            .skip(pagination.offset)
+            .limit(pagination.limit);
+        if (sort) {
+            query.sort(sort);
+        }
+        const data = await query.lean().exec();
+        return { data, total };
+    }
+    async findPaginatedResultRaw(filter, options, sort) {
+        const normalized = pagination_normalizer_1.PaginationNormalizer.normalize(options);
+        const pagination = {
+            offset: normalized.offset,
+            limit: normalized.limit,
+        };
+        const { data, total } = await this.findPaginatedRaw(filter, pagination, sort);
+        return pagination_result_factory_1.PaginationResultFactory.create(data, total, normalized);
+    }
+    /* =====================================================
+     * WRITE
+     * ===================================================== */
+    async insertRaw(document) {
+        const created = await this.model.create(document);
+        return created.toObject();
+    }
+    async updateByIdRaw(id, document, options) {
+        return this.updateOneRaw({ _id: id }, document, options);
+    }
+    async updateOneRaw(filter, document, options) {
+        const payload = this.buildSetPayload(document, options);
+        const result = await this.model.updateOne({ ...filter, deletedAt: null }, { $set: payload });
+        return this.toMongoWriteResult(result);
+    }
+    async updateManyRaw(filter, document, options) {
+        const payload = this.buildSetPayload(document, options);
+        const result = await this.model.updateMany({ ...filter, deletedAt: null }, { $set: payload });
+        return this.toMongoWriteResult(result);
+    }
+    async softDeleteRaw(id, updatedBy) {
+        const payload = {
+            deletedAt: new Date(),
+            updatedAt: new Date(),
+        };
+        if (updatedBy !== undefined) {
+            payload.updatedBy = updatedBy;
+        }
+        const result = await this.model.updateOne({ _id: id, deletedAt: null }, { $set: payload });
+        return this.toMongoWriteResult(result);
+    }
+}
+exports.MongoRepositoryBase = MongoRepositoryBase;
+//# sourceMappingURL=mongo.repository.base.js.map

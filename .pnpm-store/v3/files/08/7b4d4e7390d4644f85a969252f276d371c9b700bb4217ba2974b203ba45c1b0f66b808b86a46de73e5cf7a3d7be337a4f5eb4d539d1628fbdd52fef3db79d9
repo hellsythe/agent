@@ -1,0 +1,59 @@
+import { EventEmitter } from 'node:events';
+import Client, { type Name } from './client';
+import type { Context } from './context';
+import { UnleashEvents } from './events';
+import type { EnhancedFeatureInterface, FeatureInterface } from './feature';
+import { type FallbackFunction } from './helpers';
+import { MetricsAPI } from './impact-metrics/metric-api';
+import { InMemoryMetricRegistry } from './impact-metrics/metric-types';
+import { Strategy } from './strategy';
+import { UnleashConfig } from './unleash-config';
+import { type Variant, type VariantWithFeatureStatus } from './variant';
+export { Strategy, UnleashConfig, UnleashEvents };
+export interface StaticContext {
+    appName: string;
+    environment: string;
+}
+export declare class Unleash extends EventEmitter {
+    private static configSignature?;
+    private static instance?;
+    private static instanceCount;
+    private repository;
+    protected client: Client;
+    private metrics;
+    protected staticContext: StaticContext;
+    private synchronized;
+    private ready;
+    private started;
+    protected metricRegistry: InMemoryMetricRegistry;
+    impactMetrics: MetricsAPI;
+    constructor({ appName, environment, projectName, instanceId, url, refreshInterval, metricsInterval, metricsJitter, disableMetrics, backupPath, strategies, repository, namePrefix, customHeaders, customHeadersFunction, timeout, httpOptions, tags, bootstrap, bootstrapOverride, storageProvider, disableAutoStart, skipInstanceCountWarning, experimentalMode, }: UnleashConfig);
+    /**
+     * Will only give you an instance the first time you call the method,
+     * and then return the same instance.
+     * @param config The Unleash Config.
+     * @returns the Unleash instance
+     */
+    static getInstance(config: UnleashConfig): Unleash;
+    private cleanUnleashUrl;
+    isSynchronized(): boolean;
+    start(): Promise<void>;
+    destroy(): void;
+    isEnabled(name: Name, context?: Context, fallbackFunction?: FallbackFunction): boolean;
+    isEnabled(name: Name, context?: Context, fallbackValue?: boolean): boolean;
+    getVariant(name: string, context?: Context, fallbackVariant?: Variant): VariantWithFeatureStatus;
+    forceGetVariant(name: string, context?: Context, fallbackVariant?: Variant): Variant;
+    getFeatureToggleDefinition(toggleName: string): FeatureInterface | undefined;
+    getFeatureToggleDefinitions(): Array<FeatureInterface>;
+    getFeatureToggleDefinitions(withFullSegments: boolean): Array<EnhancedFeatureInterface>;
+    count(toggleName: string, enabled: boolean): void;
+    countVariant(toggleName: string, variantName: string): void;
+    flushMetrics(): Promise<void>;
+    destroyWithFlush(): Promise<void>;
+    /**
+     * Experimental: Change the fetching mode at runtime
+     * @param mode The new mode to switch to ('polling' or 'streaming')
+     */
+    setExperimentalMode(mode: 'polling' | 'streaming'): Promise<void>;
+}
+//# sourceMappingURL=unleash.d.ts.map

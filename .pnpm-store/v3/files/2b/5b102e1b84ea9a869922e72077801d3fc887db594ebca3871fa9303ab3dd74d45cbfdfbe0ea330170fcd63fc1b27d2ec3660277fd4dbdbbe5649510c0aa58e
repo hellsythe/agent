@@ -1,0 +1,17 @@
+import type { FilterQuery } from 'mongoose';
+import type { CriteriaFilterMap } from '../../../application/criteria/filter-operator';
+/**
+ * Builder que traduce criteria genéricos a filtros de MongoDB
+ */
+export declare class MongoCriteriaBuilder {
+    /**
+     * Construye un filtro de Mongo a partir de un criteria genérico
+     * @param criteria - Objeto con los valores a filtrar
+     * @param filterMap - Mapa que define qué operador usar para cada campo
+     */
+    static build<TCriteria extends Record<string, any>, TPersistence extends object = object>(criteria: Partial<TCriteria>, filterMap: CriteriaFilterMap<TCriteria, TPersistence>): FilterQuery<any>;
+    private static applyOperator;
+    private static buildLikeFilter;
+    private static buildRangeFilter;
+    private static escapeRegex;
+}

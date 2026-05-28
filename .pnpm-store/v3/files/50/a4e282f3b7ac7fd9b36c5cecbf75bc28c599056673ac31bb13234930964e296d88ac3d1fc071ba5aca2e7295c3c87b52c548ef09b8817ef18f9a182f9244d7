@@ -1,0 +1,26 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UnleashTestContainer = void 0;
+const abstract_mapped_port_container_1 = require("../base/abstract-mapped-port-container");
+class UnleashTestContainer extends abstract_mapped_port_container_1.AbstractMappedPortContainer {
+    appName;
+    constructor(options) {
+        super({
+            name: 'unleash',
+            internalPort: options.internalPort ?? 4242,
+            startFactory: options.startFactory,
+        });
+        this.appName = options.appName ?? 'test-app';
+    }
+    buildUrl(host, port) {
+        return `http://${host}:${port}/api`;
+    }
+    buildEnv(info) {
+        return {
+            UNLEASH_URL: info.url ?? '',
+            UNLEASH_APP_NAME: this.appName,
+        };
+    }
+}
+exports.UnleashTestContainer = UnleashTestContainer;
+//# sourceMappingURL=unleash-test-container.js.map

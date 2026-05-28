@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PaginationResultFactory = void 0;
+class PaginationResultFactory {
+    static create(items, total, pagination) {
+        const meta = {
+            current_page: pagination.page,
+            per_page: pagination.perPage,
+            total,
+            last_page: Math.ceil(total / pagination.perPage),
+            from: total === 0 ? 0 : pagination.offset + 1,
+            to: Math.min(pagination.offset + pagination.limit, total),
+        };
+        return { data: items, meta };
+    }
+}
+exports.PaginationResultFactory = PaginationResultFactory;
+//# sourceMappingURL=pagination-result.factory.js.map

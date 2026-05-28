@@ -1,0 +1,47 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MongoModule = void 0;
+const common_1 = require("@nestjs/common");
+const mongoose_1 = require("@nestjs/mongoose");
+const config_1 = require("@nestjs/config");
+let MongoModule = class MongoModule {
+};
+exports.MongoModule = MongoModule;
+exports.MongoModule = MongoModule = __decorate([
+    (0, common_1.Global)(),
+    (0, common_1.Module)({
+        imports: [
+            config_1.ConfigModule,
+            mongoose_1.MongooseModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                inject: [config_1.ConfigService],
+                useFactory: (config) => {
+                    const host = config.getOrThrow('DB_HOST');
+                    const port = config.getOrThrow('DB_PORT');
+                    const db = config.getOrThrow('DB_NAME');
+                    const user = config.get('DB_USER');
+                    const pass = config.get('DB_PASS');
+                    const credentials = user && pass
+                        ? `${encodeURIComponent(user)}:${encodeURIComponent(pass)}@`
+                        : '';
+                    return {
+                        uri: `mongodb://${credentials}${host}:${port}/${db}`,
+                        authSource: 'admin',
+                        autoIndex: false,
+                        maxPoolSize: 10,
+                        serverSelectionTimeoutMS: 5000,
+                        retryWrites: false, // MongoDB 4.0 standalone doesn't support retryable writes
+                    };
+                },
+            }),
+        ],
+        exports: [mongoose_1.MongooseModule],
+    })
+], MongoModule);
+//# sourceMappingURL=mongo.module.js.map

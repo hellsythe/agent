@@ -1,0 +1,5 @@
+import { PaginationMeta } from './pagination.meta';
+export declare class PaginationResult<T> {
+    data: T[];
+    meta: PaginationMeta;
+}

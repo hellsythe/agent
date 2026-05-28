@@ -1,0 +1,7 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RequestContextPort = void 0;
+class RequestContextPort {
+}
+exports.RequestContextPort = RequestContextPort;
+//# sourceMappingURL=request-context.port.js.map

@@ -1,0 +1,14 @@
+import { AbstractMappedPortContainer } from '../base/abstract-mapped-port-container';
+import type { ServiceConnectionInfo } from '../contracts/test-service-container';
+import type { StartedContainerLike } from '../contracts/started-container-like';
+export interface UnleashTestContainerOptions {
+    startFactory: () => Promise<StartedContainerLike>;
+    internalPort?: number;
+    appName?: string;
+}
+export declare class UnleashTestContainer extends AbstractMappedPortContainer {
+    private readonly appName;
+    constructor(options: UnleashTestContainerOptions);
+    protected buildUrl(host: string, port: number): string;
+    protected buildEnv(info: ServiceConnectionInfo): Record<string, string>;
+}

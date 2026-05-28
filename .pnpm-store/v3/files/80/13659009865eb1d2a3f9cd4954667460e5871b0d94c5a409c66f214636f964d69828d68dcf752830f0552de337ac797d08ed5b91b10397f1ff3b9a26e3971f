@@ -1,0 +1,5 @@
+import { NormalizedPagination } from './pagination.normalizer';
+import { PaginationResult } from './pagination.result';
+export declare class PaginationResultFactory {
+    static create<T>(items: T[], total: number, pagination: NormalizedPagination): PaginationResult<T>;
+}

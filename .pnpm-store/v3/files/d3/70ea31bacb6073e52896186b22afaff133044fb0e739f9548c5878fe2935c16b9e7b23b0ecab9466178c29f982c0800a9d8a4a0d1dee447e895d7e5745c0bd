@@ -1,0 +1,10 @@
+import type { TestServiceContainer } from './contracts/test-service-container';
+export declare class ContainerOrchestrator {
+    private readonly containers;
+    private readonly startedContainers;
+    constructor(containers: TestServiceContainer[]);
+    startAll(): Promise<Record<string, string>>;
+    stopAll(): Promise<void>;
+    resetAll(): Promise<void>;
+    getMergedEnv(): Record<string, string>;
+}

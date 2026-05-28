@@ -1,0 +1,9 @@
+import { UnleashFeatureFlagAdapter } from './unleash-feature-flag.adapter';
+import { DisabledFeatureFlagAdapter } from './disabled-feature-flag.adapter';
+import { ConfigService } from '@nestjs/config';
+import { FeatureFlagPort } from '../../application/ports/feature-flag.port';
+export declare const FeatureFlagProvider: {
+    provide: typeof FeatureFlagPort;
+    useFactory: (configService: ConfigService) => Promise<UnleashFeatureFlagAdapter | DisabledFeatureFlagAdapter>;
+    inject: (typeof ConfigService)[];
+};

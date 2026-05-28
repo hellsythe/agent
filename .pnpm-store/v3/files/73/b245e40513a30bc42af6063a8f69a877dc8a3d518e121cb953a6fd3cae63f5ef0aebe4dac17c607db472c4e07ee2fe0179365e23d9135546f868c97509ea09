@@ -1,0 +1,95 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.startDefaultTestInfrastructure = startDefaultTestInfrastructure;
+const testcontainers_1 = require("testcontainers");
+const container_orchestrator_1 = require("../container-orchestrator");
+const mongo_test_container_1 = require("../services/mongo-test-container");
+const unleash_test_container_1 = require("../services/unleash-test-container");
+function toStartedContainerLike(container) {
+    return {
+        getHost: () => container.getHost(),
+        getMappedPort: (port) => container.getMappedPort(port),
+        stop: () => container.stop(),
+    };
+}
+function buildBaseEnv(env) {
+    return {
+        ...env,
+        DB_USER: env.DB_USER ?? 'admin',
+        DB_PASS: env.DB_PASS ?? 'admin',
+        BASE_URL: 'http://localhost:3000',
+        LOG_LEVEL: 'warn',
+        HTTP_TIMEOUT: '60000',
+        UNLEASH_URL: env.UNLEASH_URL ?? 'http://localhost:4242/api',
+        UNLEASH_APP_NAME: env.UNLEASH_APP_NAME ?? 'ia-test',
+        UNLEASH_INSTANCE_ID: env.UNLEASH_INSTANCE_ID ?? 'test-instance',
+    };
+}
+async function startDefaultTestInfrastructure(options) {
+    const profile = options?.profile ?? 'mongo';
+    const mongo = new mongo_test_container_1.MongoTestContainer({
+        startFactory: async () => toStartedContainerLike(await new testcontainers_1.GenericContainer('mongo:4.0')
+            .withEnvironment({
+            MONGO_INITDB_ROOT_USERNAME: 'admin',
+            MONGO_INITDB_ROOT_PASSWORD: 'admin',
+        })
+            .withExposedPorts(27017)
+            .withWaitStrategy(testcontainers_1.Wait.forListeningPorts())
+            .start()),
+        dbName: 'ia_test',
+        username: 'admin',
+        password: 'admin',
+    });
+    if (profile !== 'full') {
+        const orchestrator = new container_orchestrator_1.ContainerOrchestrator([mongo]);
+        const env = buildBaseEnv(await orchestrator.startAll());
+        return {
+            orchestrator,
+            env,
+            stop: async () => {
+                await orchestrator.stopAll();
+            },
+        };
+    }
+    const network = await new testcontainers_1.Network().start();
+    const postgres = await new testcontainers_1.GenericContainer('postgres:14.19-alpine3.21')
+        .withEnvironment({
+        POSTGRES_DB: 'db',
+        POSTGRES_USER: 'postgres',
+        POSTGRES_PASSWORD: 'unleash',
+    })
+        .withNetwork(network)
+        .withNetworkAliases('unleash-db')
+        .withExposedPorts(5432)
+        .withWaitStrategy(testcontainers_1.Wait.forLogMessage('database system is ready to accept connections'))
+        .start();
+    const postgresUrl = 'postgres://postgres:unleash@unleash-db:5432/db';
+    const unleash = new unleash_test_container_1.UnleashTestContainer({
+        startFactory: async () => toStartedContainerLike(await new testcontainers_1.GenericContainer('unleashorg/unleash-server:7.2.3')
+            .withEnvironment({
+            AUTH_TYPE: 'none',
+            AUTH_ENABLE_API_TOKENS: 'false',
+            DATABASE_URL: postgresUrl,
+            DATABASE_SSL: 'false',
+            LOG_LEVEL: 'warn',
+        })
+            .withNetwork(network)
+            .withExposedPorts(4242)
+            .withStartupTimeout(180000)
+            .withWaitStrategy(testcontainers_1.Wait.forListeningPorts())
+            .start()),
+        appName: 'ia-test',
+    });
+    const orchestrator = new container_orchestrator_1.ContainerOrchestrator([mongo, unleash]);
+    const env = buildBaseEnv(await orchestrator.startAll());
+    return {
+        orchestrator,
+        env,
+        stop: async () => {
+            await orchestrator.stopAll();
+            await postgres.stop();
+            await network.stop();
+        },
+    };
+}
+//# sourceMappingURL=testcontainers-infrastructure.js.map

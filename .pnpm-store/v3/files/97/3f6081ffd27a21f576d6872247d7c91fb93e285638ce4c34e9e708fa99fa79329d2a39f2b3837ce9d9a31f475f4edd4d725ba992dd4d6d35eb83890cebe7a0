@@ -1,0 +1,4 @@
+import { FeatureFlagPort } from '../../application/ports/feature-flag.port';
+export declare class DisabledFeatureFlagAdapter extends FeatureFlagPort {
+    isEnabled(_: string, __?: string): Promise<boolean>;
+}

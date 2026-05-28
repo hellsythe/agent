@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MockServerTestContainer = void 0;
+const abstract_mapped_port_container_1 = require("../base/abstract-mapped-port-container");
+class MockServerTestContainer extends abstract_mapped_port_container_1.AbstractMappedPortContainer {
+    constructor(options) {
+        super({
+            name: 'mockserver',
+            internalPort: options.internalPort ?? 1080,
+            startFactory: options.startFactory,
+        });
+    }
+    buildUrl(host, port) {
+        return `http://${host}:${port}`;
+    }
+    buildEnv(info) {
+        return {
+            MOCKSERVER_HOST: info.host,
+            MOCKSERVER_PORT: String(info.port),
+            MOCKSERVER_URL: info.url ?? '',
+        };
+    }
+}
+exports.MockServerTestContainer = MockServerTestContainer;
+//# sourceMappingURL=mockserver-test-container.js.map

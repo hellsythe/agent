@@ -1,0 +1,3 @@
+import type { CustomHeaders } from '../headers';
+export declare const extractEnvironmentFromCustomHeaders: (customHeaders: CustomHeaders) => string | undefined;
+//# sourceMappingURL=environment-resolver.d.ts.map

@@ -1,0 +1,17 @@
+import { AbstractTestServiceContainer } from './abstract-test-service-container';
+import type { ServiceConnectionInfo } from '../contracts/test-service-container';
+import type { StartedContainerLike } from '../contracts/started-container-like';
+export interface MappedPortContainerOptions {
+    name: string;
+    internalPort: number;
+    startFactory: () => Promise<StartedContainerLike>;
+}
+export declare abstract class AbstractMappedPortContainer extends AbstractTestServiceContainer {
+    protected handle?: StartedContainerLike;
+    protected readonly internalPort: number;
+    private readonly startFactory;
+    constructor(options: MappedPortContainerOptions);
+    protected doStart(): Promise<ServiceConnectionInfo>;
+    protected doStop(): Promise<void>;
+    protected buildUrl(host: string, port: number): string | undefined;
+}

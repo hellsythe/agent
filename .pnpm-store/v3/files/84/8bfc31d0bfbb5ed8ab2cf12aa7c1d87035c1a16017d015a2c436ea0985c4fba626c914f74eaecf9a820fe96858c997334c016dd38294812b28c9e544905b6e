@@ -1,0 +1,38 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContainerOrchestrator = void 0;
+class ContainerOrchestrator {
+    containers;
+    startedContainers = [];
+    constructor(containers) {
+        this.containers = containers;
+    }
+    async startAll() {
+        for (const container of this.containers) {
+            await container.start();
+            this.startedContainers.push(container);
+        }
+        return this.getMergedEnv();
+    }
+    async stopAll() {
+        for (let i = this.startedContainers.length - 1; i >= 0; i -= 1) {
+            await this.startedContainers[i].stop();
+        }
+        this.startedContainers.length = 0;
+    }
+    async resetAll() {
+        for (const container of this.startedContainers) {
+            if (container.reset) {
+                await container.reset();
+            }
+        }
+    }
+    getMergedEnv() {
+        return this.containers.reduce((acc, container) => {
+            Object.assign(acc, container.getEnv());
+            return acc;
+        }, {});
+    }
+}
+exports.ContainerOrchestrator = ContainerOrchestrator;
+//# sourceMappingURL=container-orchestrator.js.map

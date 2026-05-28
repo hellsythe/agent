@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PaginationNormalizer = void 0;
+class PaginationNormalizer {
+    static DEFAULT_PAGE = 1;
+    static DEFAULT_PER_PAGE = 10;
+    static MAX_PER_PAGE = 100;
+    static normalize(options) {
+        const page = options?.page && options.page > 0
+            ? Math.floor(options.page)
+            : this.DEFAULT_PAGE;
+        const perPage = options?.perPage && options.perPage > 0
+            ? Math.min(Math.floor(options.perPage), this.MAX_PER_PAGE)
+            : this.DEFAULT_PER_PAGE;
+        return {
+            page,
+            perPage,
+            offset: (page - 1) * perPage,
+            limit: perPage,
+        };
+    }
+}
+exports.PaginationNormalizer = PaginationNormalizer;
+//# sourceMappingURL=pagination.normalizer.js.map

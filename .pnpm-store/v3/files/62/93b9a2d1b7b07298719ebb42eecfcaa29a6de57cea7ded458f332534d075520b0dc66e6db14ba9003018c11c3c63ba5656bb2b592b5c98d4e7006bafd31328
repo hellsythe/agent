@@ -1,0 +1,1 @@
+{"version":3,"file":"remote-addresss-strategy.d.ts","sourceRoot":"","sources":["../../src/strategy/remote-addresss-strategy.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,YAAY,CAAC;AAC1C,OAAO,EAAE,QAAQ,EAAE,MAAM,YAAY,CAAC;AAEtC,MAAM,CAAC,OAAO,OAAO,qBAAsB,SAAQ,QAAQ;;IAKzD,SAAS,CAAC,UAAU,EAAE;QAAE,GAAG,CAAC,EAAE,MAAM,CAAA;KAAE,EAAE,OAAO,EAAE,OAAO;CAiBzD"}

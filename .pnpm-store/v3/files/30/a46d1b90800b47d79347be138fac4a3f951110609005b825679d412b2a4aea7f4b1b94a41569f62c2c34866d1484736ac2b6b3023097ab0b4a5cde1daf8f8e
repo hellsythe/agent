@@ -1,0 +1,1 @@
+export declare function configureHttp(app: any): void;

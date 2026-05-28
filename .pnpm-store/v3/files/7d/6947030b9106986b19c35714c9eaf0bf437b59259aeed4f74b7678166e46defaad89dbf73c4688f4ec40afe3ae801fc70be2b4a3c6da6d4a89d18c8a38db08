@@ -1,0 +1,36 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AbstractMappedPortContainer = void 0;
+const abstract_test_service_container_1 = require("./abstract-test-service-container");
+class AbstractMappedPortContainer extends abstract_test_service_container_1.AbstractTestServiceContainer {
+    handle;
+    internalPort;
+    startFactory;
+    constructor(options) {
+        super(options.name);
+        this.internalPort = options.internalPort;
+        this.startFactory = options.startFactory;
+    }
+    async doStart() {
+        this.handle = await this.startFactory();
+        const host = this.handle.getHost();
+        const port = this.handle.getMappedPort(this.internalPort);
+        return {
+            host,
+            port,
+            url: this.buildUrl(host, port),
+        };
+    }
+    async doStop() {
+        if (!this.handle) {
+            return;
+        }
+        await this.handle.stop();
+        this.handle = undefined;
+    }
+    buildUrl(host, port) {
+        return `${host}:${port}`;
+    }
+}
+exports.AbstractMappedPortContainer = AbstractMappedPortContainer;
+//# sourceMappingURL=abstract-mapped-port-container.js.map

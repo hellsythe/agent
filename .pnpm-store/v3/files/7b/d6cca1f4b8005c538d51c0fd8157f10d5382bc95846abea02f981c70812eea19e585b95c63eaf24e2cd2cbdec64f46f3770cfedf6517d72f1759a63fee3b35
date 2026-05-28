@@ -1,0 +1,48 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const node_fs_1 = require("node:fs");
+const node_path_1 = require("node:path");
+const helpers_1 = require("../helpers");
+const { writeFile, readFile } = node_fs_1.promises;
+class FileStorageProvider {
+    backupPath;
+    constructor(backupPath) {
+        if (!backupPath) {
+            throw new Error('backup Path is required');
+        }
+        this.backupPath = backupPath;
+    }
+    getPath(key) {
+        return (0, node_path_1.join)(this.backupPath, `/unleash-backup-${(0, helpers_1.safeName)(key)}.json`);
+    }
+    async set(key, data) {
+        return writeFile(this.getPath(key), JSON.stringify(data));
+    }
+    async get(key) {
+        const path = this.getPath(key);
+        let data;
+        try {
+            data = await readFile(path, 'utf8');
+        }
+        catch (error) {
+            if (typeof error === 'object' && error && 'code' in error && error.code === 'ENOENT') {
+                return undefined;
+            }
+            throw error;
+        }
+        if (!data || data.trim().length === 0) {
+            return undefined;
+        }
+        try {
+            return JSON.parse(data);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                error.message = `Unleash storage failed parsing file ${path}: ${error.message}`;
+            }
+            throw error;
+        }
+    }
+}
+exports.default = FileStorageProvider;
+//# sourceMappingURL=storage-provider-file.js.map

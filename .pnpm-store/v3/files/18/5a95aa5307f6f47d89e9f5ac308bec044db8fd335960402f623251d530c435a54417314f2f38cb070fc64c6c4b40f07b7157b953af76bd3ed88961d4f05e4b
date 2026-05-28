@@ -1,0 +1,3 @@
+import { ApplicationError } from '../../../application/errors/application-error';
+import { ProblemDetails } from './problem-details';
+export declare function mapApplicationError(error: ApplicationError): ProblemDetails;

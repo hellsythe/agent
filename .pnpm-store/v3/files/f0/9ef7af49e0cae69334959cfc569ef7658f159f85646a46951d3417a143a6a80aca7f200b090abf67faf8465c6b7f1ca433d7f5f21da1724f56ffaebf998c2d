@@ -1,0 +1,96 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdaptiveFetcher = void 0;
+const node_events_1 = require("node:events");
+const events_1 = require("../events");
+const polling_fetcher_1 = require("./polling-fetcher");
+const streaming_fetcher_1 = require("./streaming-fetcher");
+class AdaptiveFetcher extends node_events_1.EventEmitter {
+    currentFetcher;
+    pollingFetcher;
+    streamingFetcher;
+    options;
+    stopped = false;
+    constructor(options) {
+        super();
+        this.options = { ...options, onModeChange: this.handleModeChange.bind(this) };
+        this.pollingFetcher = new polling_fetcher_1.PollingFetcher(this.options);
+        this.streamingFetcher = new streaming_fetcher_1.StreamingFetcher(this.options);
+        this.setupFetcherEventForwarding(this.pollingFetcher);
+        this.setupFetcherEventForwarding(this.streamingFetcher);
+        this.currentFetcher =
+            this.options.mode.type === 'streaming' ? this.streamingFetcher : this.pollingFetcher;
+    }
+    setupFetcherEventForwarding(fetcher) {
+        fetcher.on(events_1.UnleashEvents.Error, (err) => this.emit(events_1.UnleashEvents.Error, err));
+        fetcher.on(events_1.UnleashEvents.Warn, (msg) => this.emit(events_1.UnleashEvents.Warn, msg));
+        fetcher.on(events_1.UnleashEvents.Unchanged, () => this.emit(events_1.UnleashEvents.Unchanged));
+    }
+    async handleModeChange(newMode) {
+        if (this.stopped) {
+            return;
+        }
+        if (newMode === 'polling') {
+            await this.switchToPolling();
+        }
+        else if (newMode === 'streaming') {
+            await this.switchToStreaming();
+        }
+    }
+    async switchToPolling() {
+        if (this.currentFetcher === this.pollingFetcher) {
+            return;
+        }
+        this.currentFetcher.stop();
+        this.currentFetcher = this.pollingFetcher;
+        await this.currentFetcher.start();
+        this.emit(events_1.UnleashEvents.Mode, { from: 'streaming', to: 'polling' });
+    }
+    async switchToStreaming() {
+        if (this.currentFetcher === this.streamingFetcher) {
+            return;
+        }
+        this.currentFetcher.stop();
+        this.currentFetcher = this.streamingFetcher;
+        await this.currentFetcher.start();
+        this.emit(events_1.UnleashEvents.Mode, { from: 'polling', to: 'streaming' });
+    }
+    async start() {
+        await this.currentFetcher.start();
+    }
+    async setMode(mode) {
+        await this.handleModeChange(mode);
+    }
+    stop() {
+        this.stopped = true;
+        this.currentFetcher.stop();
+        this.pollingFetcher.stop();
+        this.streamingFetcher.stop();
+    }
+    getMode() {
+        if (this.currentFetcher === this.streamingFetcher) {
+            return 'streaming';
+        }
+        return 'polling';
+    }
+    // Compatibility methods for accessing polling fetcher internals
+    getFailures() {
+        return this.pollingFetcher.getFailures();
+    }
+    nextFetch() {
+        return this.pollingFetcher.nextFetch();
+    }
+    async fetch() {
+        if (this.currentFetcher === this.pollingFetcher) {
+            return this.pollingFetcher.fetch();
+        }
+    }
+    getEtag() {
+        return this.pollingFetcher.getEtag();
+    }
+    setEtag(value) {
+        this.pollingFetcher.setEtag(value);
+    }
+}
+exports.AdaptiveFetcher = AdaptiveFetcher;
+//# sourceMappingURL=adaptive-fetcher.js.map

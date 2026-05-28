@@ -1,0 +1,10 @@
+import type { Context } from '../context';
+import { Strategy } from './strategy';
+export default class GradualRolloutUserIdStrategy extends Strategy {
+    constructor();
+    isEnabled(parameters: {
+        percentage?: number | string;
+        groupId?: string;
+    }, context: Context): boolean;
+}
+//# sourceMappingURL=gradual-rollout-user-id.d.ts.map

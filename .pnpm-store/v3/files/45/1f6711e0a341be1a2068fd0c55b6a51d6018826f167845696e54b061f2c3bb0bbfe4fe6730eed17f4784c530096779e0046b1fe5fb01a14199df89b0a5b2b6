@@ -1,0 +1,270 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.InMemoryMetricRegistry = void 0;
+function isInvalidValue(value) {
+    return value !== undefined && !Number.isFinite(value);
+}
+function getLabelKey(labels) {
+    if (!labels)
+        return '';
+    return Object.keys(labels)
+        .sort()
+        .map((k) => `${k}=${labels[k]}`)
+        .join(',');
+}
+function parseLabelKey(key) {
+    const labels = {};
+    if (!key)
+        return labels;
+    for (const pair of key.split(',')) {
+        const [k, v] = pair.split('=');
+        labels[k] = v;
+    }
+    return labels;
+}
+const isNumericMetricSample = (sample) => 'value' in sample;
+const isBucketMetricSample = (sample) => 'buckets' in sample;
+class CounterImpl {
+    opts;
+    values = new Map();
+    constructor(opts) {
+        this.opts = opts;
+    }
+    inc(value, labels) {
+        if (isInvalidValue(value))
+            return;
+        const delta = value ?? 1;
+        if (delta <= 0)
+            return;
+        const key = getLabelKey(labels);
+        const current = this.values.get(key) ?? 0;
+        this.values.set(key, current + delta);
+    }
+    collect() {
+        const samples = [...this.values.entries()].map(([key, value]) => ({
+            labels: parseLabelKey(key),
+            value,
+        }));
+        this.values.clear();
+        if (samples.length === 0) {
+            samples.push({
+                labels: {},
+                value: 0,
+            });
+        }
+        return {
+            name: this.opts.name,
+            help: this.opts.help,
+            type: 'counter',
+            samples,
+        };
+    }
+}
+class GaugeImpl {
+    opts;
+    values = new Map();
+    constructor(opts) {
+        this.opts = opts;
+    }
+    inc(value, labels) {
+        if (isInvalidValue(value))
+            return;
+        const delta = value ?? 1;
+        const key = getLabelKey(labels);
+        const current = this.values.get(key) ?? 0;
+        this.values.set(key, current + delta);
+    }
+    dec(value, labels) {
+        if (isInvalidValue(value))
+            return;
+        const delta = value ?? 1;
+        const key = getLabelKey(labels);
+        const current = this.values.get(key) ?? 0;
+        this.values.set(key, current - delta);
+    }
+    set(value, labels) {
+        if (isInvalidValue(value))
+            return;
+        const key = getLabelKey(labels);
+        this.values.set(key, value);
+    }
+    collect() {
+        const samples = [...this.values.entries()].map(([key, value]) => ({
+            labels: parseLabelKey(key),
+            value,
+        }));
+        this.values.clear();
+        return {
+            name: this.opts.name,
+            help: this.opts.help,
+            type: 'gauge',
+            samples,
+        };
+    }
+}
+class HistogramImpl {
+    opts;
+    values = new Map();
+    buckets;
+    constructor(opts) {
+        this.opts = opts;
+        const defaultBuckets = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
+        const buckets = opts.buckets && opts.buckets.length > 0 ? opts.buckets : defaultBuckets;
+        const sortedBuckets = [...new Set(buckets.filter((b) => b !== Infinity))].sort((a, b) => a - b);
+        this.buckets = [...sortedBuckets, Infinity];
+    }
+    restore(sample) {
+        const key = getLabelKey(sample.labels);
+        const data = {
+            count: sample.count,
+            sum: sample.sum,
+            buckets: new Map(sample.buckets.map((b) => [b.le === '+Inf' ? Infinity : b.le, b.count])),
+        };
+        this.values.set(key, data);
+    }
+    observe(value, labels) {
+        if (isInvalidValue(value))
+            return;
+        const key = getLabelKey(labels);
+        let data = this.values.get(key);
+        if (!data) {
+            const buckets = new Map();
+            for (const bucket of this.buckets) {
+                buckets.set(bucket, 0);
+            }
+            data = {
+                count: 0,
+                sum: 0,
+                buckets,
+            };
+            this.values.set(key, data);
+        }
+        data.count++;
+        data.sum += value;
+        for (const bucket of this.buckets) {
+            if (value <= bucket) {
+                const currentCount = data.buckets.get(bucket) ?? 0;
+                data.buckets.set(bucket, currentCount + 1);
+            }
+        }
+    }
+    collect() {
+        const samples = Array.from(this.values.entries()).map(([key, data]) => ({
+            labels: parseLabelKey(key),
+            count: data.count,
+            sum: data.sum,
+            buckets: Array.from(data.buckets.entries()).map(([le, count]) => ({
+                le: le === Infinity ? '+Inf' : le,
+                count,
+            })),
+        }));
+        this.values.clear();
+        if (samples.length === 0) {
+            samples.push({
+                labels: {},
+                count: 0,
+                sum: 0,
+                buckets: this.buckets.map((le) => ({
+                    le: le === Infinity ? '+Inf' : le,
+                    count: 0,
+                })),
+            });
+        }
+        return {
+            name: this.opts.name,
+            help: this.opts.help,
+            type: 'histogram',
+            samples,
+        };
+    }
+}
+class InMemoryMetricRegistry {
+    counters = new Map();
+    gauges = new Map();
+    histograms = new Map();
+    getCounter(counterName) {
+        return this.counters.get(counterName);
+    }
+    getGauge(gaugeName) {
+        return this.gauges.get(gaugeName);
+    }
+    getHistogram(histogramName) {
+        return this.histograms.get(histogramName);
+    }
+    counter(opts) {
+        const key = opts.name;
+        let counter = this.counters.get(key);
+        if (!counter) {
+            counter = new CounterImpl(opts);
+            this.counters.set(key, counter);
+        }
+        return counter;
+    }
+    gauge(opts) {
+        const key = opts.name;
+        let gauge = this.gauges.get(key);
+        if (!gauge) {
+            gauge = new GaugeImpl(opts);
+            this.gauges.set(key, gauge);
+        }
+        return gauge;
+    }
+    histogram(opts) {
+        const key = opts.name;
+        let histogram = this.histograms.get(key);
+        if (!histogram) {
+            histogram = new HistogramImpl(opts);
+            this.histograms.set(key, histogram);
+        }
+        return histogram;
+    }
+    collect() {
+        const allCounters = [...this.counters.values()].map((c) => c.collect());
+        const allGauges = [...this.gauges.values()].map((g) => g.collect());
+        const allHistograms = [...this.histograms.values()].map((h) => h.collect());
+        const allMetrics = [...allCounters, ...allGauges, ...allHistograms];
+        const nonEmpty = allMetrics.filter((metric) => metric.samples.length > 0);
+        return nonEmpty.length > 0 ? nonEmpty : [];
+    }
+    restore(metrics) {
+        for (const metric of metrics) {
+            switch (metric.type) {
+                case 'counter': {
+                    const counter = this.counter({ name: metric.name, help: metric.help });
+                    for (const sample of metric.samples) {
+                        if (isNumericMetricSample(sample)) {
+                            counter.inc(sample.value, sample.labels);
+                        }
+                    }
+                    break;
+                }
+                case 'gauge': {
+                    const gauge = this.gauge({ name: metric.name, help: metric.help });
+                    for (const sample of metric.samples) {
+                        if (isNumericMetricSample(sample)) {
+                            gauge.set(sample.value, sample.labels);
+                        }
+                    }
+                    break;
+                }
+                case 'histogram': {
+                    const firstSample = metric.samples.find(isBucketMetricSample);
+                    if (firstSample) {
+                        const buckets = firstSample.buckets.map((b) => b.le === '+Inf' ? Infinity : b.le);
+                        const histogram = this.histogram({
+                            name: metric.name,
+                            help: metric.help,
+                            buckets,
+                        });
+                        metric.samples.filter(isBucketMetricSample).forEach((sample) => {
+                            histogram.restore(sample);
+                        });
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+exports.InMemoryMetricRegistry = InMemoryMetricRegistry;
+//# sourceMappingURL=metric-types.js.map

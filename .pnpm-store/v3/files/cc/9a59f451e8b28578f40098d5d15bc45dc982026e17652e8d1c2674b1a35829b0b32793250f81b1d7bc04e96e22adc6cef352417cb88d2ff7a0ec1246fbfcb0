@@ -1,0 +1,7 @@
+import { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
+export declare class Rfc7807Filter implements ExceptionFilter {
+    private statusToType;
+    private normalizeHttpException;
+    private normalizeUnknownError;
+    catch(exception: unknown, host: ArgumentsHost): void;
+}

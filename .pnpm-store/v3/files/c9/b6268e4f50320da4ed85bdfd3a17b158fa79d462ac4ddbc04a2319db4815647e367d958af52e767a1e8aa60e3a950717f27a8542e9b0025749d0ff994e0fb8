@@ -1,0 +1,7 @@
+import { FeatureFlagPort } from '../../application/ports/feature-flag.port';
+export declare class UnleashFeatureFlagAdapter extends FeatureFlagPort {
+    private readonly client;
+    constructor(client: any);
+    onModuleDestroy(): void;
+    isEnabled(flag: string, context?: string): Promise<boolean>;
+}

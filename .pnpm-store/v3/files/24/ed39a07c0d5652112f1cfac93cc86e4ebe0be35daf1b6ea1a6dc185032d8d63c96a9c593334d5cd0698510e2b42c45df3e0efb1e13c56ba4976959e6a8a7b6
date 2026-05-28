@@ -1,0 +1,43 @@
+import { FilterQuery, Model } from 'mongoose';
+import { PaginationOptions } from '../../../application/pagination/pagination.options';
+import { PaginationResult } from '../../../application/pagination/pagination.result';
+export interface MongoPaginationParams {
+    offset: number;
+    limit: number;
+}
+export interface MongoSortParams {
+    [field: string]: 1 | -1;
+}
+export type MongoWriteResult = {
+    acknowledged: boolean;
+    matchedCount: number;
+    modifiedCount: number;
+};
+export interface MongoUpdateOptions {
+    touchUpdatedAt?: boolean;
+    updatedBy?: string | null;
+}
+/**
+ * Base repository de Mongo
+ * - SOLO infraestructura
+ * - NO expone contratos de dominio
+ * - Reutiliza CRUD técnico
+ */
+export declare abstract class MongoRepositoryBase<TSchema, TPersistence> {
+    protected readonly model: Model<TSchema>;
+    protected constructor(model: Model<TSchema>);
+    private toMongoWriteResult;
+    private buildSetPayload;
+    protected findOneRaw(filter: FilterQuery<TSchema>): Promise<TPersistence | null>;
+    protected findManyRaw(filter: FilterQuery<TSchema>): Promise<TPersistence[]>;
+    protected findPaginatedRaw(filter: FilterQuery<TSchema>, pagination: MongoPaginationParams, sort?: MongoSortParams): Promise<{
+        data: TPersistence[];
+        total: number;
+    }>;
+    protected findPaginatedResultRaw(filter: FilterQuery<TSchema>, options?: PaginationOptions, sort?: MongoSortParams): Promise<PaginationResult<TPersistence>>;
+    protected insertRaw(document: Partial<TSchema>): Promise<TPersistence>;
+    protected updateByIdRaw(id: string, document: Partial<TSchema>, options?: MongoUpdateOptions): Promise<MongoWriteResult>;
+    protected updateOneRaw(filter: FilterQuery<TSchema>, document: Partial<TSchema>, options?: MongoUpdateOptions): Promise<MongoWriteResult>;
+    protected updateManyRaw(filter: FilterQuery<TSchema>, document: Partial<TSchema>, options?: MongoUpdateOptions): Promise<MongoWriteResult>;
+    protected softDeleteRaw(id: string, updatedBy?: string | null): Promise<MongoWriteResult>;
+}

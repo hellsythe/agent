@@ -1,0 +1,119 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Rfc7807Filter = void 0;
+const common_1 = require("@nestjs/common");
+const domain_error_1 = require("../../../domain/errors/domain-error");
+const application_error_1 = require("../../../application/errors/application-error");
+const application_error_mapper_1 = require("../errors/application-error.mapper");
+const problem_details_mapper_1 = require("../errors/problem-details.mapper");
+let Rfc7807Filter = class Rfc7807Filter {
+    statusToType(status) {
+        if (status >= 500) {
+            return 'about:blank/internal-server-error';
+        }
+        if (status === common_1.HttpStatus.NOT_FOUND) {
+            return 'about:blank/not-found';
+        }
+        if (status === common_1.HttpStatus.BAD_REQUEST) {
+            return 'about:blank/invalid-request';
+        }
+        if (status === common_1.HttpStatus.UNAUTHORIZED) {
+            return 'about:blank/unauthorized';
+        }
+        if (status === common_1.HttpStatus.FORBIDDEN) {
+            return 'about:blank/forbidden';
+        }
+        if (status === common_1.HttpStatus.CONFLICT) {
+            return 'about:blank/conflict';
+        }
+        return 'about:blank';
+    }
+    normalizeHttpException(exception) {
+        const status = exception.getStatus();
+        const response = exception.getResponse();
+        if (typeof response === 'string') {
+            return {
+                type: this.statusToType(status),
+                title: common_1.HttpStatus[status] ?? 'HTTP Error',
+                status,
+                detail: response,
+            };
+        }
+        if (response && typeof response === 'object') {
+            const payload = response;
+            const detailFromMessage = Array.isArray(payload.message)
+                ? payload.message.join(', ')
+                : typeof payload.message === 'string'
+                    ? payload.message
+                    : undefined;
+            return {
+                type: typeof payload.type === 'string'
+                    ? payload.type
+                    : this.statusToType(status),
+                title: typeof payload.title === 'string'
+                    ? payload.title
+                    : typeof payload.error === 'string'
+                        ? payload.error
+                        : (common_1.HttpStatus[status] ?? 'HTTP Error'),
+                status,
+                detail: typeof payload.detail === 'string'
+                    ? payload.detail
+                    : (detailFromMessage ?? 'Request failed.'),
+                errors: Array.isArray(payload.errors)
+                    ? payload.errors.filter((item) => typeof item === 'string')
+                    : undefined,
+            };
+        }
+        return {
+            type: this.statusToType(status),
+            title: common_1.HttpStatus[status] ?? 'HTTP Error',
+            status,
+            detail: exception.message || 'Request failed.',
+        };
+    }
+    normalizeUnknownError(exception) {
+        if (exception instanceof Error) {
+            return {
+                type: 'about:blank/internal-server-error',
+                title: 'Internal Server Error',
+                status: common_1.HttpStatus.INTERNAL_SERVER_ERROR,
+                detail: exception.message || 'Unexpected error',
+            };
+        }
+        return {
+            type: 'about:blank/internal-server-error',
+            title: 'Internal Server Error',
+            status: common_1.HttpStatus.INTERNAL_SERVER_ERROR,
+            detail: 'Unexpected error',
+        };
+    }
+    catch(exception, host) {
+        const ctx = host.switchToHttp();
+        const response = ctx.getResponse();
+        const request = ctx.getRequest();
+        const problem = exception instanceof domain_error_1.DomainError
+            ? (0, problem_details_mapper_1.mapDomainError)(exception)
+            : exception instanceof application_error_1.ApplicationError
+                ? (0, application_error_mapper_1.mapApplicationError)(exception)
+                : exception instanceof common_1.HttpException
+                    ? this.normalizeHttpException(exception)
+                    : this.normalizeUnknownError(exception);
+        problem.instance = request.originalUrl;
+        problem.transactionId = request.headers['x-request-id']?.toString();
+        response
+            .status(problem.status ?? common_1.HttpStatus.BAD_REQUEST)
+            .type('application/problem+json')
+            .json(problem);
+    }
+};
+exports.Rfc7807Filter = Rfc7807Filter;
+exports.Rfc7807Filter = Rfc7807Filter = __decorate([
+    (0, common_1.Catch)()
+], Rfc7807Filter);
+//# sourceMappingURL=rfc7807.filter.js.map

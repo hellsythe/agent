@@ -1,0 +1,30 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FeatureFlagProvider = void 0;
+const unleash_feature_flag_adapter_1 = require("./unleash-feature-flag.adapter");
+const disabled_feature_flag_adapter_1 = require("./disabled-feature-flag.adapter");
+const config_1 = require("@nestjs/config");
+const feature_flag_port_1 = require("../../application/ports/feature-flag.port");
+const unleash_client_1 = require("unleash-client");
+function isEnabled(value) {
+    return ['1', 'true', 'yes', 'on'].includes((value ?? '').toLowerCase());
+}
+exports.FeatureFlagProvider = {
+    provide: feature_flag_port_1.FeatureFlagPort,
+    useFactory: async (configService) => {
+        const unleashEnabled = isEnabled(configService.get('UNLEASH_ENABLED'));
+        if (!unleashEnabled) {
+            return new disabled_feature_flag_adapter_1.DisabledFeatureFlagAdapter();
+        }
+        const client = await (0, unleash_client_1.startUnleash)({
+            url: configService.getOrThrow('UNLEASH_URL'),
+            appName: configService.getOrThrow('UNLEASH_APP_NAME'),
+            instanceId: configService.getOrThrow('UNLEASH_INSTANCE_ID'),
+            refreshInterval: Number(configService.getOrThrow('UNLEASH_REFRESH_INTERVAL')),
+            metricsInterval: Number(configService.getOrThrow('UNLEASH_METRICS_INTERVAL')),
+        });
+        return new unleash_feature_flag_adapter_1.UnleashFeatureFlagAdapter(client);
+    },
+    inject: [config_1.ConfigService],
+};
+//# sourceMappingURL=feature-flag.provider.js.map

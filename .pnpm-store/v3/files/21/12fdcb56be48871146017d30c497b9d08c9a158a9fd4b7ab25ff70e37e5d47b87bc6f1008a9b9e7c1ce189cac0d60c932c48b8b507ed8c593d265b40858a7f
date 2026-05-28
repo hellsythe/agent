@@ -1,0 +1,1 @@
+{"version":3,"file":"metric-client.js","sourceRoot":"","sources":["../../src/impact-metrics/metric-client.ts"],"names":[],"mappings":";;;AAAA,wCAAqC;AAErC,MAAa,mBAAoB,SAAQ,iBAAO;IAC9C,YAAY,GAAG,IAA2C;QACxD,KAAK,CAAC,GAAG,IAAI,CAAC,CAAC;QACf,OAAO,CAAC,IAAI,CACV,qCAAqC;YACnC,iDAAiD;YACjD,uDAAuD,CAC1D,CAAC;IACJ,CAAC;CACF;AATD,kDASC"}

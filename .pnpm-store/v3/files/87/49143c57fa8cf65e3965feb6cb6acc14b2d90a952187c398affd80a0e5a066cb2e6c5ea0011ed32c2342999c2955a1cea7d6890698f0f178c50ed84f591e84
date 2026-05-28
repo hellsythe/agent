@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DisabledFeatureFlagAdapter = void 0;
+const feature_flag_port_1 = require("../../application/ports/feature-flag.port");
+class DisabledFeatureFlagAdapter extends feature_flag_port_1.FeatureFlagPort {
+    async isEnabled(_, __) {
+        return false;
+    }
+}
+exports.DisabledFeatureFlagAdapter = DisabledFeatureFlagAdapter;
+//# sourceMappingURL=disabled-feature-flag.adapter.js.map

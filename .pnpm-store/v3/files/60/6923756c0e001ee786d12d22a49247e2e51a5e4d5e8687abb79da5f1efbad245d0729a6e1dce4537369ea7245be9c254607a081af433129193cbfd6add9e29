@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PaginationMeta = void 0;
+class PaginationMeta {
+    current_page;
+    per_page;
+    total;
+    last_page;
+    from;
+    to;
+}
+exports.PaginationMeta = PaginationMeta;
+//# sourceMappingURL=pagination.meta.js.map

@@ -1,0 +1,52 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.configureHttp = configureHttp;
+const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
+const rfc7807_filter_1 = require("./filters/rfc7807.filter");
+const common_2 = require("@nestjs/common");
+function configureHttp(app) {
+    const collectValidationMessages = (errors, parentPath = '') => {
+        const messages = [];
+        for (const error of errors) {
+            const path = parentPath
+                ? `${parentPath}.${error.property}`
+                : error.property;
+            if (error.constraints) {
+                for (const message of Object.values(error.constraints)) {
+                    messages.push(`${path}: ${message}`);
+                }
+            }
+            if (error.children && error.children.length > 0) {
+                messages.push(...collectValidationMessages(error.children, path));
+            }
+        }
+        return messages;
+    };
+    app.setGlobalPrefix('api');
+    app.enableVersioning({
+        type: common_1.VersioningType.URI,
+        defaultVersion: '1',
+    });
+    app.useGlobalPipes(new common_1.ValidationPipe({
+        skipNullProperties: false,
+        transform: true,
+        validateCustomDecorators: true,
+        whitelist: true,
+        exceptionFactory: (errors) => {
+            const messages = collectValidationMessages(errors);
+            return new common_2.BadRequestException({
+                type: 'https://errors.yourdomain.com/validation/invalid-parameter',
+                title: 'Validation failed',
+                status: 400,
+                detail: 'One or more request parameters are invalid.',
+                errors: messages,
+            });
+        },
+    }));
+    app.useGlobalInterceptors(new common_1.ClassSerializerInterceptor(app.get(core_1.Reflector), {
+        strategy: 'exposeAll',
+    }));
+    app.useGlobalFilters(new rfc7807_filter_1.Rfc7807Filter());
+}
+//# sourceMappingURL=http.bootstrap.js.map

@@ -1,0 +1,30 @@
+/**
+ * Operadores soportados por el DSL de filtros.
+ * Nota: `range` espera un valor con shape `{ from?: unknown; to?: unknown }`.
+ */
+export type FilterOperator = 'equals' | 'neq' | 'like' | 'in' | 'gt' | 'gte' | 'lt' | 'lte' | 'range';
+export interface LikeFilterOptions {
+    matchType?: 'contains' | 'startsWith' | 'endsWith';
+    caseSensitive?: boolean;
+}
+export interface RangeFilterValue {
+    from?: unknown;
+    to?: unknown;
+}
+/**
+ * Configuración de filtro por campo de criteria.
+ * `fieldName` permite mapear el nombre del criteria a un campo persistido.
+ */
+export interface FieldFilterConfig<TPersistence extends object = object> {
+    operator: FilterOperator;
+    fieldName?: Extract<keyof TPersistence, string>;
+    options?: LikeFilterOptions;
+}
+/**
+ * Mapa tipado de filtros por criteria.
+ * - `TCriteria`: criterios recibidos por módulo.
+ * - `TPersistence`: shape de persistencia para tipar `fieldName`.
+ */
+export type CriteriaFilterMap<TCriteria, TPersistence extends object = object> = {
+    [K in keyof TCriteria]?: FieldFilterConfig<TPersistence>;
+};

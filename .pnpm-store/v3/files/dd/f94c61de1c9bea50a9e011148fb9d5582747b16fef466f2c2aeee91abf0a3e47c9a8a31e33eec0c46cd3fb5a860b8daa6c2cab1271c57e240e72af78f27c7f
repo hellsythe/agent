@@ -1,0 +1,48 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AbstractTestServiceContainer = void 0;
+class AbstractTestServiceContainer {
+    name;
+    started = false;
+    info;
+    constructor(name) {
+        this.name = name;
+    }
+    async start() {
+        if (this.started) {
+            return;
+        }
+        this.info = await this.doStart();
+        this.started = true;
+    }
+    async stop() {
+        if (!this.started) {
+            return;
+        }
+        await this.doStop();
+        this.started = false;
+        this.info = undefined;
+    }
+    async reset() {
+        this.assertStarted();
+        if (!this.doReset) {
+            return;
+        }
+        await this.doReset();
+    }
+    getConnectionInfo() {
+        this.assertStarted();
+        return this.info;
+    }
+    getEnv() {
+        const info = this.getConnectionInfo();
+        return this.buildEnv(info);
+    }
+    assertStarted() {
+        if (!this.started || !this.info) {
+            throw new Error(`${this.name} container is not started`);
+        }
+    }
+}
+exports.AbstractTestServiceContainer = AbstractTestServiceContainer;
+//# sourceMappingURL=abstract-test-service-container.js.map

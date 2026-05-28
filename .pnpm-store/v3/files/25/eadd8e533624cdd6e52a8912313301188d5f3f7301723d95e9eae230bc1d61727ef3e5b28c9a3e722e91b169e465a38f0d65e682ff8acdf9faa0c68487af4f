@@ -1,0 +1,42 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MongoTestContainer = void 0;
+const abstract_mapped_port_container_1 = require("../base/abstract-mapped-port-container");
+class MongoTestContainer extends abstract_mapped_port_container_1.AbstractMappedPortContainer {
+    dbName;
+    username;
+    password;
+    constructor(options) {
+        super({
+            name: 'mongo',
+            internalPort: options.internalPort ?? 27017,
+            startFactory: options.startFactory,
+        });
+        this.dbName = options.dbName ?? 'test';
+        this.username = options.username;
+        this.password = options.password;
+    }
+    buildUrl(host, port) {
+        const auth = this.username && this.password
+            ? `${encodeURIComponent(this.username)}:${encodeURIComponent(this.password)}@`
+            : '';
+        return `mongodb://${auth}${host}:${port}/${this.dbName}`;
+    }
+    buildEnv(info) {
+        const env = {
+            DB_HOST: info.host,
+            DB_PORT: String(info.port),
+            DB_NAME: this.dbName,
+            MONGO_URL: info.url ?? '',
+        };
+        if (this.username) {
+            env.DB_USER = this.username;
+        }
+        if (this.password) {
+            env.DB_PASS = this.password;
+        }
+        return env;
+    }
+}
+exports.MongoTestContainer = MongoTestContainer;
+//# sourceMappingURL=mongo-test-container.js.map

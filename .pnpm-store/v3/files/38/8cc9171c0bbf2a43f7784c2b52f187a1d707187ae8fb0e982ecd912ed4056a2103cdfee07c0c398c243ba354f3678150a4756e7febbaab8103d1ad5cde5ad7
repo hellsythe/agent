@@ -1,0 +1,24 @@
+import type { Context } from './context';
+export declare enum UnleashEvents {
+    Ready = "ready",
+    Error = "error",
+    Warn = "warn",
+    Unchanged = "unchanged",
+    Changed = "changed",
+    Synchronized = "synchronized",
+    Count = "count",
+    CountVariant = "countVariant",
+    Sent = "sent",
+    Registered = "registered",
+    Impression = "impression",
+    Mode = "mode"
+}
+export interface ImpressionEvent {
+    eventType: 'isEnabled' | 'getVariant';
+    context: Context;
+    enabled: boolean;
+    featureName: string;
+    variant?: string;
+}
+export declare function createImpressionEvent(evt: ImpressionEvent): ImpressionEvent;
+//# sourceMappingURL=events.d.ts.map
