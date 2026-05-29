@@ -25,7 +25,10 @@ export class SendMessageUseCase {
   async execute(command: SendMessageCommand): Promise<SendMessageResult> {
     const turnId = randomUUID();
     const now = new Date();
-    const sessionId = await this.resolveSessionId(command.sessionId, command.userId);
+    const sessionId = await this.resolveSessionId(
+      command.sessionId,
+      command.userId,
+    );
 
     const userMessage = new Chat({
       id: '',

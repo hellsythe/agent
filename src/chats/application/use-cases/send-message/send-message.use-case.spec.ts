@@ -27,8 +27,9 @@ describe('SendMessageUseCase', () => {
     };
 
     const sessionRepository: SessionRepository = {
-      save: jest.fn(async (session: Session) =>
-        new Session({ ...session.toPrimitives(), id: 'session-1' }),
+      save: jest.fn(
+        async (session: Session) =>
+          new Session({ ...session.toPrimitives(), id: 'session-1' }),
       ),
       findAll: jest.fn(),
       findByCriteria: jest.fn(),
@@ -37,7 +38,11 @@ describe('SendMessageUseCase', () => {
       delete: jest.fn(),
     };
 
-    const useCase = new SendMessageUseCase(chatRepository, sessionRepository, llmPort);
+    const useCase = new SendMessageUseCase(
+      chatRepository,
+      sessionRepository,
+      llmPort,
+    );
     const result = await useCase.execute({
       sessionId: 'session-1',
       userId: 'user-1',
@@ -69,8 +74,12 @@ describe('SendMessageUseCase', () => {
     };
 
     const sessionRepository: SessionRepository = {
-      save: jest.fn(async (session: Session) =>
-        new Session({ ...session.toPrimitives(), id: 'generated-session-id' }),
+      save: jest.fn(
+        async (session: Session) =>
+          new Session({
+            ...session.toPrimitives(),
+            id: 'generated-session-id',
+          }),
       ),
       findAll: jest.fn(),
       findByCriteria: jest.fn(),
@@ -79,7 +88,11 @@ describe('SendMessageUseCase', () => {
       delete: jest.fn(),
     };
 
-    const useCase = new SendMessageUseCase(chatRepository, sessionRepository, llmPort);
+    const useCase = new SendMessageUseCase(
+      chatRepository,
+      sessionRepository,
+      llmPort,
+    );
     const result = await useCase.execute({ userId: 'user-1', message: 'hi' });
 
     expect(sessionRepository.save).toHaveBeenCalledTimes(1);
