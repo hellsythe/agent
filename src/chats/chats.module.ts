@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { SessionsModule } from '../sessions/sessions.module';
 import { LLM_PORT } from './application/ports/llm.port';
 import { CreateChatUseCase } from './application/use-cases/create-chat/create-chat.use-case';
 import { DeleteChatUseCase } from './application/use-cases/delete-chat/delete-chat.use-case';
@@ -20,6 +21,7 @@ import {
 @Module({
   imports: [
     ConfigModule,
+    SessionsModule,
     MongooseModule.forFeature([
       { name: ChatSchema.name, schema: ChatSchemaDefinition },
     ]),

@@ -1,5 +1,5 @@
 export interface SendMessageCommand {
-  sessionId: string;
+  sessionId?: string;
   userId: string;
   message: string;
 }
