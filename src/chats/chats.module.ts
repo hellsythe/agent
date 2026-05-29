@@ -12,12 +12,17 @@ import { CHAT_REPOSITORY } from './domain/chat.repository';
 import { OpenAiHttpAdapter } from './infrastructure/http/adapters/llm/openai-http.adapter';
 import { ChatsController } from './infrastructure/http/controllers/chats.controller';
 import { ChatMongoRepository } from './infrastructure/persistence/mongo/chat.mongo.repository';
-import { ChatSchema, ChatSchemaDefinition } from './infrastructure/persistence/mongo/chat.schema';
+import {
+  ChatSchema,
+  ChatSchemaDefinition,
+} from './infrastructure/persistence/mongo/chat.schema';
 
 @Module({
   imports: [
     ConfigModule,
-    MongooseModule.forFeature([{ name: ChatSchema.name, schema: ChatSchemaDefinition }]),
+    MongooseModule.forFeature([
+      { name: ChatSchema.name, schema: ChatSchemaDefinition },
+    ]),
   ],
   controllers: [ChatsController],
   providers: [

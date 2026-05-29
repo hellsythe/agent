@@ -7,7 +7,10 @@ import { SendMessageUseCase } from '../../../application/use-cases/send-message/
 import { UpdateChatUseCase } from '../../../application/use-cases/update-chat/update-chat.use-case';
 import { Chat } from '../../../domain/chat.entity';
 
-const buildChat = (role: 'user' | 'assistant' | 'system' | 'tool', visibility: 'public' | 'internal') =>
+const buildChat = (
+  role: 'user' | 'assistant' | 'system' | 'tool',
+  visibility: 'public' | 'internal',
+) =>
   new Chat({
     id: 'chat-1',
     sessionId: 'session-1',

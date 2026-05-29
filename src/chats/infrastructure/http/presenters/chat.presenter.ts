@@ -18,7 +18,9 @@ export class ChatPresenter {
     };
   }
 
-  static toSendMessageResponse(result: SendMessageResult): SendMessageResponseDto {
+  static toSendMessageResponse(
+    result: SendMessageResult,
+  ): SendMessageResponseDto {
     return {
       userMessage: this.toResponse(result.userMessage),
       assistantMessage: this.toResponse(result.assistantMessage),

@@ -36,7 +36,9 @@ export class ChatsController {
   ) {}
 
   @Post('send')
-  @ApiOperation({ summary: 'Send a message to the LLM and store full turn trace' })
+  @ApiOperation({
+    summary: 'Send a message to the LLM and store full turn trace',
+  })
   @ApiOkResponse({ type: SendMessageResponseDto })
   async send(@Body() dto: SendMessageDto): Promise<SendMessageResponseDto> {
     const result = await this.sendMessageUseCase.execute({
@@ -68,7 +70,10 @@ export class ChatsController {
 
   @Patch(':id')
   @ApiOkResponse({ type: ChatResponseDto })
-  async update(@Param('id') id: string, @Body() dto: UpdateChatDto): Promise<ChatResponseDto> {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateChatDto,
+  ): Promise<ChatResponseDto> {
     const chat = await this.updateChatUseCase.execute({
       id,
       content: dto.content,
