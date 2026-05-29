@@ -41,10 +41,14 @@ export async function stopTestInfrastructure(): Promise<void> {
   }
 }
 
-export async function startMongoTestInfrastructure(): Promise<Record<string, string>> {
+export async function startMongoTestInfrastructure(): Promise<
+  Record<string, string>
+> {
   return startTestInfrastructure('mongo');
 }
 
-export async function startFullTestInfrastructure(): Promise<Record<string, string>> {
+export async function startFullTestInfrastructure(): Promise<
+  Record<string, string>
+> {
   return startTestInfrastructure('full');
 }

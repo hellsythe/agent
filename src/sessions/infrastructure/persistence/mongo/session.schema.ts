@@ -24,6 +24,7 @@ export class SessionSchema {
   updatedAt!: Date;
 }
 
-export const SessionSchemaDefinition = SchemaFactory.createForClass(SessionSchema);
+export const SessionSchemaDefinition =
+  SchemaFactory.createForClass(SessionSchema);
 
 SessionSchemaDefinition.index({ userId: 1, deletedAt: 1 });

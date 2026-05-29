@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { useContainer } from 'class-validator';
-import { GracefulShutdownModule, setupGracefulShutdown } from 'nestjs-graceful-shutdown';
+import {
+  GracefulShutdownModule,
+  setupGracefulShutdown,
+} from 'nestjs-graceful-shutdown';
 import { configureHttp } from '@sdkconsultoria/nestjs-base/shared/infrastructure/http/http.bootstrap';
 import { setupSwagger } from '@sdkconsultoria/nestjs-base/shared/infrastructure/http/swagger.config';
 import { AppModule } from './app.module';

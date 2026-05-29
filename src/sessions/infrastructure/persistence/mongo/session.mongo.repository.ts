@@ -6,7 +6,10 @@ import { MongoRepositoryBase } from '@sdkconsultoria/nestjs-base/shared/infrastr
 import { SessionRepository } from '../../../domain/session.repository';
 import { Session } from '../../../domain/session.entity';
 import { SessionCriteria } from '../../../domain/session.criteria';
-import { SessionMapper, SessionPersistence } from '../../mappers/session.mapper';
+import {
+  SessionMapper,
+  SessionPersistence,
+} from '../../mappers/session.mapper';
 import { SessionSchema } from './session.schema';
 import { SESSION_FILTER_MAP } from './session.filter-map';
 

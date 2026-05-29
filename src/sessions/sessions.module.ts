@@ -8,11 +8,16 @@ import { UpdateSessionUseCase } from './application/use-cases/update-session/upd
 import { SESSION_REPOSITORY } from './domain/session.repository';
 import { SessionsController } from './infrastructure/http/controllers/sessions.controller';
 import { SessionMongoRepository } from './infrastructure/persistence/mongo/session.mongo.repository';
-import { SessionSchema, SessionSchemaDefinition } from './infrastructure/persistence/mongo/session.schema';
+import {
+  SessionSchema,
+  SessionSchemaDefinition,
+} from './infrastructure/persistence/mongo/session.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: SessionSchema.name, schema: SessionSchemaDefinition }]),
+    MongooseModule.forFeature([
+      { name: SessionSchema.name, schema: SessionSchemaDefinition },
+    ]),
   ],
   controllers: [SessionsController],
   providers: [

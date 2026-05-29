@@ -48,7 +48,9 @@ export class SessionsController {
 
   @Get()
   @ApiOkResponse({ type: SessionResponseDto, isArray: true })
-  async findAll(@Query() query: FindSessionsQueryDto): Promise<SessionResponseDto[]> {
+  async findAll(
+    @Query() query: FindSessionsQueryDto,
+  ): Promise<SessionResponseDto[]> {
     const sessions = await this.getSessionsUseCase.execute(query);
     return sessions.map((session) => SessionPresenter.toResponse(session));
   }
@@ -67,8 +69,14 @@ export class SessionsController {
 
   @Patch(':id')
   @ApiOkResponse({ type: SessionResponseDto })
-  async update(@Param('id') id: string, @Body() dto: UpdateSessionDto): Promise<SessionResponseDto> {
-    const session = await this.updateSessionUseCase.execute({ id, alias: dto.alias });
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateSessionDto,
+  ): Promise<SessionResponseDto> {
+    const session = await this.updateSessionUseCase.execute({
+      id,
+      alias: dto.alias,
+    });
 
     if (!session) {
       throw new NotFoundException('Session not found');

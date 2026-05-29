@@ -21,7 +21,9 @@ const buildSession = () =>
 
 describe('SessionsController', () => {
   it('creates a session', async () => {
-    const createSessionUseCase = { execute: jest.fn().mockResolvedValue(buildSession()) };
+    const createSessionUseCase = {
+      execute: jest.fn().mockResolvedValue(buildSession()),
+    };
 
     const moduleRef = await Test.createTestingModule({
       controllers: [SessionsController],
