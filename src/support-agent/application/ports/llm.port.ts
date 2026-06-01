@@ -14,8 +14,13 @@ export interface LlmGenerateResult {
   completionTokens?: number;
 }
 
+export interface LlmGenerateJsonResult<T> extends LlmGenerateResult {
+  json: T;
+}
+
 export const LLM_PORT = Symbol('LLM_PORT');
 
 export interface LlmPort {
   generateText(params: LlmGenerateParams): Promise<LlmGenerateResult>;
+  generateJson<T>(params: LlmGenerateParams): Promise<LlmGenerateJsonResult<T>>;
 }

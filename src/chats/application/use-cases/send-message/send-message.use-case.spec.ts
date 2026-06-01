@@ -1,20 +1,22 @@
 import { SendMessageUseCase } from './send-message.use-case';
-import type { LlmPort } from '../../ports/llm.port';
 import type { ChatRepository } from '../../../domain/chat.repository';
 import type { Chat } from '../../../domain/chat.entity';
 import { Session } from '../../../../sessions/domain/session.entity';
 import type { SessionRepository } from '../../../../sessions/domain/session.repository';
+import type { AgentLoopService } from '../../../../support-agent/application/services/agent-loop.service';
 
 describe('SendMessageUseCase', () => {
   it('stores user, assistant and internal messages', async () => {
-    const llmPort: LlmPort = {
-      generateText: jest.fn().mockResolvedValue({
-        content: 'hello from llm',
-        model: 'gpt-4o-mini',
-        promptTokens: 5,
-        completionTokens: 4,
+    const agentLoopService = {
+      execute: jest.fn().mockResolvedValue({
+        response: 'diagnosis response',
+        playbookId: 'carousel_template_failed',
+        confidence: 0.88,
+        evidence: ['clients.findByName: ok'],
+        finalInputs: { clientId: 'client-1' },
+        iterations: 2,
       }),
-    };
+    } as unknown as AgentLoopService;
 
     const chatRepository: ChatRepository = {
       save: jest.fn(),
@@ -41,7 +43,7 @@ describe('SendMessageUseCase', () => {
     const useCase = new SendMessageUseCase(
       chatRepository,
       sessionRepository,
-      llmPort,
+      agentLoopService,
     );
     const result = await useCase.execute({
       sessionId: 'session-1',
@@ -51,17 +53,21 @@ describe('SendMessageUseCase', () => {
 
     expect(result.userMessage.role).toBe('user');
     expect(result.assistantMessage.role).toBe('assistant');
-    expect(result.internalMessages).toHaveLength(2);
+    expect(result.internalMessages).toHaveLength(3);
     expect(chatRepository.saveMany).toHaveBeenCalledTimes(1);
   });
 
   it('creates a new session when sessionId is missing', async () => {
-    const llmPort: LlmPort = {
-      generateText: jest.fn().mockResolvedValue({
-        content: 'hello from llm',
-        model: 'gpt-4o-mini',
+    const agentLoopService = {
+      execute: jest.fn().mockResolvedValue({
+        response: 'diagnosis response',
+        playbookId: 'carousel_template_failed',
+        confidence: 0.88,
+        evidence: ['clients.findByName: ok'],
+        finalInputs: { clientId: 'client-1' },
+        iterations: 2,
       }),
-    };
+    } as unknown as AgentLoopService;
 
     const chatRepository: ChatRepository = {
       save: jest.fn(),
@@ -91,7 +97,7 @@ describe('SendMessageUseCase', () => {
     const useCase = new SendMessageUseCase(
       chatRepository,
       sessionRepository,
-      llmPort,
+      agentLoopService,
     );
     const result = await useCase.execute({ userId: 'user-1', message: 'hi' });
 
