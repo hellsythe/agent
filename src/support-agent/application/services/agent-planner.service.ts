@@ -8,9 +8,7 @@ interface PlannerDecisionJson extends PlannerDecision {}
 
 @Injectable()
 export class AgentPlannerService {
-  constructor(
-    @Inject(LLM_PORT) private readonly llmPort: LlmPort,
-  ) {}
+  constructor(@Inject(LLM_PORT) private readonly llmPort: LlmPort) {}
 
   async decide(input: {
     message: string;

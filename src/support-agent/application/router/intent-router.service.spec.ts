@@ -2,7 +2,9 @@ import { IntentRouterService } from './intent-router.service';
 import type { LlmIntentClassifierPort } from '../../infrastructure/http/adapters/llm/llm-intent-classifier.adapter';
 
 describe('IntentRouterService', () => {
-  const createMockLlmClassifier = (overrides: Partial<ReturnType<LlmIntentClassifierPort['classify']>> = {}): LlmIntentClassifierPort => ({
+  const createMockLlmClassifier = (
+    overrides: Partial<ReturnType<LlmIntentClassifierPort['classify']>> = {},
+  ): LlmIntentClassifierPort => ({
     classify: jest.fn().mockResolvedValue({
       incidentType: 'unknown',
       channel: 'unknown',
@@ -20,7 +22,9 @@ describe('IntentRouterService', () => {
     });
 
     const service = new IntentRouterService(mockLlm);
-    const result = await service.route('cliente Chedraui no puede enviar plantillas carousel');
+    const result = await service.route(
+      'cliente Chedraui no puede enviar plantillas carousel',
+    );
 
     expect(result.domain).toBe('messaging');
     expect(result.topPlaybook?.id).toBe('carousel_template_failed');
@@ -52,7 +56,9 @@ describe('IntentRouterService', () => {
     });
 
     const service = new IntentRouterService(mockLlm);
-    const result = await service.route('El cliente aurrera no puede hacer envios en portal');
+    const result = await service.route(
+      'El cliente aurrera no puede hacer envios en portal',
+    );
 
     expect(result.topPlaybook?.id).toBe('shipping_error_triage');
   });
@@ -65,7 +71,9 @@ describe('IntentRouterService', () => {
     });
 
     const service = new IntentRouterService(mockLlm);
-    const result = await service.route('El cliente es Chedraui y la plantilla es pago_mayo');
+    const result = await service.route(
+      'El cliente es Chedraui y la plantilla es pago_mayo',
+    );
 
     expect(result.llmUsed).toBe(true);
     expect(result.topPlaybook).toBeNull();

@@ -26,5 +26,8 @@ export const TOOL_REGISTRY = Symbol('TOOL_REGISTRY');
 export interface ToolRegistryPort {
   getAvailableTools(): ToolDefinition[];
   getTool(name: string): ToolDefinition | null;
-  executeTool(name: string, inputs: Record<string, unknown>): Promise<ToolExecutionResult>;
+  executeTool(
+    name: string,
+    inputs: Record<string, unknown>,
+  ): Promise<ToolExecutionResult>;
 }

@@ -13,9 +13,7 @@ export class OpenAiHttpAdapter implements LlmPort {
   private readonly client: OpenAI;
   private readonly model: string;
 
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     const apiKey =
       this.configService.get<string>('OPENAI_API_KEY') ??
       process.env.OPENAI_API_KEY;
@@ -42,7 +40,9 @@ export class OpenAiHttpAdapter implements LlmPort {
       model: completion.model,
       promptTokens: completion.usage?.prompt_tokens,
       completionTokens: completion.usage?.completion_tokens,
-      contentPreview: this.truncate(completion.choices[0]?.message?.content ?? ''),
+      contentPreview: this.truncate(
+        completion.choices[0]?.message?.content ?? '',
+      ),
     });
 
     return {

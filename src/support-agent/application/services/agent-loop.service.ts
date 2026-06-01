@@ -42,7 +42,10 @@ export class AgentLoopService {
       lastMissingInputs: string[];
     };
   }): Promise<AgentLoopResult> {
-    const effectiveMessage = this.buildEffectiveMessage(input.message, input.conversationContext);
+    const effectiveMessage = this.buildEffectiveMessage(
+      input.message,
+      input.conversationContext,
+    );
     const routed = await this.intentRouter.route(effectiveMessage);
 
     if (!routed.topPlaybook || routed.confidence < 0.3) {
@@ -63,12 +66,16 @@ export class AgentLoopService {
     }
 
     let currentPlaybook: Playbook = routed.topPlaybook;
-    let currentInputs: Record<string, unknown> = await this.inputExtractor.extract(
-      effectiveMessage,
-      currentPlaybook.requiredInputs,
-    );
+    let currentInputs: Record<string, unknown> =
+      await this.inputExtractor.extract(
+        effectiveMessage,
+        currentPlaybook.requiredInputs,
+      );
     if (input.previousState?.pendingPlaybookId === currentPlaybook.id) {
-      currentInputs = { ...input.previousState.collectedInputs, ...currentInputs };
+      currentInputs = {
+        ...input.previousState.collectedInputs,
+        ...currentInputs,
+      };
     }
     if (routed.channel !== 'unknown') {
       currentInputs.channel = routed.channel;
@@ -104,7 +111,10 @@ export class AgentLoopService {
       });
 
       currentInputs = { ...currentInputs, ...execution.trace.finalInputs };
-      const preconditionError = this.validatePreconditions(currentPlaybook, currentInputs);
+      const preconditionError = this.validatePreconditions(
+        currentPlaybook,
+        currentInputs,
+      );
       if (preconditionError) {
         return {
           response: preconditionError,
@@ -121,7 +131,10 @@ export class AgentLoopService {
         };
       }
 
-      const routedPlaybookId = this.resolveRoutedPlaybook(currentPlaybook, currentInputs);
+      const routedPlaybookId = this.resolveRoutedPlaybook(
+        currentPlaybook,
+        currentInputs,
+      );
       if (routedPlaybookId) {
         const nextPlaybook = this.findPlaybook(routedPlaybookId);
         if (nextPlaybook && nextPlaybook.id !== currentPlaybook.id) {
@@ -165,7 +178,10 @@ export class AgentLoopService {
         maxIterations: this.maxIterations,
       });
 
-      confidence = Math.min(1, Math.max(confidence, decision.confidence ?? confidence));
+      confidence = Math.min(
+        1,
+        Math.max(confidence, decision.confidence ?? confidence),
+      );
 
       if (decision.action === 'switch_playbook' && decision.playbookId) {
         const nextPlaybook = this.findPlaybook(decision.playbookId);
@@ -242,7 +258,10 @@ export class AgentLoopService {
     };
   }
 
-  private buildEffectiveMessage(message: string, conversationContext?: string): string {
+  private buildEffectiveMessage(
+    message: string,
+    conversationContext?: string,
+  ): string {
     const context = conversationContext?.trim();
     if (!context) {
       return message;
@@ -251,18 +270,28 @@ export class AgentLoopService {
   }
 
   private findPlaybook(playbookId: PlaybookId): Playbook | null {
-    return PLAYBOOK_DEFINITIONS.find((playbook) => playbook.id === playbookId) ?? null;
+    return (
+      PLAYBOOK_DEFINITIONS.find((playbook) => playbook.id === playbookId) ??
+      null
+    );
   }
 
-  private resolveRoutedPlaybook(playbook: Playbook, inputs: Record<string, unknown>): PlaybookId | null {
+  private resolveRoutedPlaybook(
+    playbook: Playbook,
+    inputs: Record<string, unknown>,
+  ): PlaybookId | null {
     if (!playbook.routing || playbook.routing.mode !== 'by_context') {
       return null;
     }
     const channel = String(inputs.channel ?? '').toLowerCase();
-    const runtimeApiVersion = String(inputs.runtimeApiVersion ?? '').toLowerCase();
+    const runtimeApiVersion = String(
+      inputs.runtimeApiVersion ?? '',
+    ).toLowerCase();
     const matchedRule = playbook.routing.rules.find((rule) => {
       const channelOk = !rule.when.channel || rule.when.channel === channel;
-      const runtimeOk = !rule.when.runtimeApiVersion || rule.when.runtimeApiVersion === runtimeApiVersion;
+      const runtimeOk =
+        !rule.when.runtimeApiVersion ||
+        rule.when.runtimeApiVersion === runtimeApiVersion;
       return channelOk && runtimeOk;
     });
     return matchedRule?.goToPlaybookId ?? null;
@@ -290,7 +319,8 @@ export class AgentLoopService {
       }
     }
 
-    const requiredInputs = playbook.preconditions.requiredInputsForExecution ?? [];
+    const requiredInputs =
+      playbook.preconditions.requiredInputsForExecution ?? [];
     const hasMissingRequired = requiredInputs.some((field) => {
       const value = inputs[field];
       return value === undefined || value === null || value === '';

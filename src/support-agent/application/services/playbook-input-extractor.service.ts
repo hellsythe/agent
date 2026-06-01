@@ -6,13 +6,18 @@ import type { LlmPort } from '../ports/llm.port';
 export class PlaybookInputExtractorService {
   constructor(@Inject(LLM_PORT) private readonly llmPort: LlmPort) {}
 
-  async extract(message: string, requiredInputs: string[]): Promise<Record<string, string>> {
+  async extract(
+    message: string,
+    requiredInputs: string[],
+  ): Promise<Record<string, string>> {
     if (!requiredInputs.length) {
       return {};
     }
 
     try {
-      const response = await this.llmPort.generateJson<{ extractedInputs: Record<string, string> }>({
+      const response = await this.llmPort.generateJson<{
+        extractedInputs: Record<string, string>;
+      }>({
         messages: [
           {
             role: 'system',

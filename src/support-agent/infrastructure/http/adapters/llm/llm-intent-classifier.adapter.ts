@@ -19,7 +19,9 @@ export interface LlmIntentClassifierPort {
 
 @Injectable()
 export class LlmIntentClassifierAdapter implements LlmIntentClassifierPort {
-  private readonly validPlaybookIds = new Set(PLAYBOOK_DEFINITIONS.map((playbook) => playbook.id));
+  private readonly validPlaybookIds = new Set(
+    PLAYBOOK_DEFINITIONS.map((playbook) => playbook.id),
+  );
   private readonly validChannels = new Set([
     'auronix_portal',
     'send_portal',
@@ -27,23 +29,22 @@ export class LlmIntentClassifierAdapter implements LlmIntentClassifierPort {
     'unknown',
   ] as const);
 
-  constructor(
-    @Inject(LLM_PORT) private readonly llmPort: LlmPort,
-  ) {}
+  constructor(@Inject(LLM_PORT) private readonly llmPort: LlmPort) {}
 
   async classify(message: string): Promise<LlmClassificationResult> {
     console.log('LLM intent classification request', { message });
 
     try {
-      const incidentCatalog = PLAYBOOK_DEFINITIONS
-        .map((playbook) => `- ${playbook.id}: ${playbook.description}`)
-        .join('\n');
+      const incidentCatalog = PLAYBOOK_DEFINITIONS.map(
+        (playbook) => `- ${playbook.id}: ${playbook.description}`,
+      ).join('\n');
 
-      const response = await this.llmPort.generateJson<LlmClassificationResult>({
-        messages: [
-          {
-            role: 'system',
-            content: `You are an intent classifier for an internal support agent at Auronix.
+      const response = await this.llmPort.generateJson<LlmClassificationResult>(
+        {
+          messages: [
+            {
+              role: 'system',
+              content: `You are an intent classifier for an internal support agent at Auronix.
 
 Your task is to analyze user messages and classify them into:
 1. incidentType: the specific playbook to use
@@ -78,13 +79,14 @@ Routing rule for shipping incidents:
 - Do not choose specialized shipping playbooks at classification time; runtime version and specialization are resolved later by tools and routing rules.
 
 Return ONLY valid JSON matching the interface structure.`,
-          },
-          {
-            role: 'user',
-            content: message,
-          },
-        ],
-      });
+            },
+            {
+              role: 'user',
+              content: message,
+            },
+          ],
+        },
+      );
 
       console.log('LLM intent classification response', {
         classification: response.json,
@@ -109,11 +111,16 @@ Return ONLY valid JSON matching the interface structure.`,
     }
   }
 
-  private normalizeIncidentType(rawIncidentType: PlaybookId | 'unknown' | undefined): PlaybookId | 'unknown' {
+  private normalizeIncidentType(
+    rawIncidentType: PlaybookId | 'unknown' | undefined,
+  ): PlaybookId | 'unknown' {
     if (!rawIncidentType) {
       return 'unknown';
     }
-    if (String(rawIncidentType).startsWith('shipping_error_') && rawIncidentType !== 'shipping_error_triage') {
+    if (
+      String(rawIncidentType).startsWith('shipping_error_') &&
+      rawIncidentType !== 'shipping_error_triage'
+    ) {
       return 'shipping_error_triage';
     }
     return this.validPlaybookIds.has(rawIncidentType as PlaybookId)
@@ -122,7 +129,12 @@ Return ONLY valid JSON matching the interface structure.`,
   }
 
   private normalizeChannel(
-    rawChannel: 'auronix_portal' | 'send_portal' | 'api_integration' | 'unknown' | undefined,
+    rawChannel:
+      | 'auronix_portal'
+      | 'send_portal'
+      | 'api_integration'
+      | 'unknown'
+      | undefined,
   ): 'auronix_portal' | 'send_portal' | 'api_integration' | 'unknown' {
     if (!rawChannel || !this.validChannels.has(rawChannel)) {
       return 'unknown';
@@ -131,7 +143,10 @@ Return ONLY valid JSON matching the interface structure.`,
   }
 
   private normalizeConfidence(rawConfidence: number | undefined): number {
-    const value = typeof rawConfidence === 'number' && Number.isFinite(rawConfidence) ? rawConfidence : 0.4;
+    const value =
+      typeof rawConfidence === 'number' && Number.isFinite(rawConfidence)
+        ? rawConfidence
+        : 0.4;
     return Math.max(0, Math.min(1, value));
   }
 }

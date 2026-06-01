@@ -63,7 +63,9 @@ describe('LlmIntentClassifierAdapter', () => {
     });
     const adapter = new LlmIntentClassifierAdapter(llmPort);
 
-    const result = await adapter.classify('el cliente 49980 no puede hacer envios');
+    const result = await adapter.classify(
+      'el cliente 49980 no puede hacer envios',
+    );
 
     expect(result.incidentType).toBe('shipping_error_triage');
     expect(result.channel).toBe('unknown');

@@ -134,10 +134,11 @@ export class SendMessageUseCase {
       lastMissingInputs: string[];
     };
   }> {
-    const previousMessages = (await this.chatRepository.findByCriteria({
-      sessionId,
-      visibility: undefined,
-    })) ?? [];
+    const previousMessages =
+      (await this.chatRepository.findByCriteria({
+        sessionId,
+        visibility: undefined,
+      })) ?? [];
 
     const previousState = this.extractLatestState(previousMessages);
     const publicMessages = previousMessages.filter(
@@ -157,16 +158,21 @@ export class SendMessageUseCase {
     };
   }
 
-  private extractLatestState(messages: Chat[]): {
-    pendingPlaybookId: PlaybookId | 'unknown';
-    collectedInputs: Record<string, unknown>;
-    lastMissingInputs: string[];
-  } | undefined {
+  private extractLatestState(messages: Chat[]):
+    | {
+        pendingPlaybookId: PlaybookId | 'unknown';
+        collectedInputs: Record<string, unknown>;
+        lastMissingInputs: string[];
+      }
+    | undefined {
     const ordered = [...messages].sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
     for (const message of ordered) {
-      if (message.visibility !== 'internal' || !message.content.startsWith('AGENT_STATE ')) {
+      if (
+        message.visibility !== 'internal' ||
+        !message.content.startsWith('AGENT_STATE ')
+      ) {
         continue;
       }
 

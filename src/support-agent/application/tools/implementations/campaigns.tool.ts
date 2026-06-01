@@ -13,7 +13,12 @@ export class CampaignsTool {
     throw new Error(`Campaign not found: ${inputs.name}`);
   }
 
-  async getErrors(inputs: { campaignId: string }): Promise<Record<string, unknown>> {
-    return { campaignId: inputs.campaignId, errors: ['Rate limit exceeded at 14:00'] };
+  async getErrors(inputs: {
+    campaignId: string;
+  }): Promise<Record<string, unknown>> {
+    return {
+      campaignId: inputs.campaignId,
+      errors: ['Rate limit exceeded at 14:00'],
+    };
   }
 }

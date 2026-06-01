@@ -29,7 +29,9 @@ export class IntentRouterService {
     const hasValidIncident = llmResult.incidentType !== 'unknown';
 
     if (hasHighConfidence && hasValidIncident) {
-      const playbook = PLAYBOOK_DEFINITIONS.find((p) => p.id === llmResult.incidentType);
+      const playbook = PLAYBOOK_DEFINITIONS.find(
+        (p) => p.id === llmResult.incidentType,
+      );
       if (playbook) {
         return {
           domain: playbook.domain,

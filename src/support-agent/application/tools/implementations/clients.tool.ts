@@ -2,12 +2,31 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ClientsTool {
-  private readonly clientsById: Record<string, { clientId: string; name: string; status: string }> = {
+  private readonly clientsById: Record<
+    string,
+    { clientId: string; name: string; status: string }
+  > = {
     '49980': { clientId: '49980', name: 'Aurrera', status: 'active' },
-    'client-aurrera-mx': { clientId: 'client-aurrera-mx', name: 'Aurrera', status: 'active' },
-    'client-walmart-mx': { clientId: 'client-walmart-mx', name: 'Walmart', status: 'active' },
-    'client-chedraui-norte': { clientId: 'client-chedraui-norte', name: 'Chedraui Norte', status: 'active' },
-    'client-chedraui-sur': { clientId: 'client-chedraui-sur', name: 'Chedraui Sur', status: 'active' },
+    'client-aurrera-mx': {
+      clientId: 'client-aurrera-mx',
+      name: 'Aurrera',
+      status: 'active',
+    },
+    'client-walmart-mx': {
+      clientId: 'client-walmart-mx',
+      name: 'Walmart',
+      status: 'active',
+    },
+    'client-chedraui-norte': {
+      clientId: 'client-chedraui-norte',
+      name: 'Chedraui Norte',
+      status: 'active',
+    },
+    'client-chedraui-sur': {
+      clientId: 'client-chedraui-sur',
+      name: 'Chedraui Sur',
+      status: 'active',
+    },
   };
 
   async findByName(inputs: { name: string }): Promise<Record<string, unknown>> {
@@ -26,10 +45,18 @@ export class ClientsTool {
       };
     }
     if (normalized === 'aurrera') {
-      return { clientId: 'client-aurrera-mx', name: 'Aurrera', status: 'active' };
+      return {
+        clientId: 'client-aurrera-mx',
+        name: 'Aurrera',
+        status: 'active',
+      };
     }
     if (normalized === 'walmart') {
-      return { clientId: 'client-walmart-mx', name: 'Walmart', status: 'active' };
+      return {
+        clientId: 'client-walmart-mx',
+        name: 'Walmart',
+        status: 'active',
+      };
     }
     throw new Error(`Client not found: ${inputs.name}`);
   }
@@ -44,7 +71,11 @@ export class ClientsTool {
       if (!byId) {
         throw new Error(`Client not found for clientId: ${normalizedId}`);
       }
-      return { clientId: byId.clientId, clientName: byId.name, status: byId.status };
+      return {
+        clientId: byId.clientId,
+        clientName: byId.name,
+        status: byId.status,
+      };
     }
 
     if (inputs.clientName) {
@@ -62,7 +93,10 @@ export class ClientsTool {
     clientId: string;
     requestedChannel?: string;
   }): Promise<Record<string, unknown>> {
-    const profileByClientId: Record<string, { runtimeApiVersion: 'v1' | 'v2' }> = {
+    const profileByClientId: Record<
+      string,
+      { runtimeApiVersion: 'v1' | 'v2' }
+    > = {
       'client-aurrera-mx': { runtimeApiVersion: 'v1' },
       'client-walmart-mx': { runtimeApiVersion: 'v2' },
       'client-chedraui-norte': { runtimeApiVersion: 'v1' },
@@ -71,7 +105,9 @@ export class ClientsTool {
 
     const profile = profileByClientId[inputs.clientId];
     if (!profile) {
-      throw new Error(`Runtime profile not found for clientId: ${inputs.clientId}`);
+      throw new Error(
+        `Runtime profile not found for clientId: ${inputs.clientId}`,
+      );
     }
 
     return {
